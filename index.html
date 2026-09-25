@@ -1,2166 +1,1122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-<title>YATHIN 燿 — 常世 the wandering ledger</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Veloce 3D - Procedural Web Racer</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+      margin: 0;
+      padding: 0;
+    }
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #050508;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    #game-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 1;
+    }
 
-<!-- Guaranteed Preloader Dismissal Script (Runs before CDNs) -->
-<script>
-window.__preloaderDismissed = false;
-function dismissPreloader() {
-  if (window.__preloaderDismissed) return;
-  window.__preloaderDismissed = true;
-  var pl = document.getElementById('preloader');
-  if (pl) {
-    pl.classList.add('done');
-    setTimeout(function() { pl.style.display = 'none'; }, 850);
-  }
-  if (window.gsap) {
-    gsap.from('.hero-kicker', { opacity: 0, y: 20, duration: 1, delay: 0.1, ease: 'power3.out' });
-    gsap.from('.hero-title', { opacity: 0, y: 35, duration: 1.3, delay: 0.25, ease: 'power3.out' });
-    gsap.from('.hero-glyph', { opacity: 0, y: 20, duration: 1, delay: 0.45, ease: 'power3.out' });
-    gsap.from('.hero-sub', { opacity: 0, y: 25, duration: 1.2, delay: 0.65, ease: 'power3.out' });
-    gsap.from('.scroll-cue', { opacity: 0, y: 15, duration: 1, delay: 0.85, ease: 'power3.out' });
-  }
-}
-setTimeout(dismissPreloader, 1800);
-window.addEventListener('load', function() { setTimeout(dismissPreloader, 500); });
-document.addEventListener('DOMContentLoaded', function() { setTimeout(dismissPreloader, 900); });
-</script>
+    /* HUD Styling */
+    #hud {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px;
+    }
 
-<!-- Motion & Animation Libraries -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    .hud-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 100%;
+    }
 
-<style>
-/* ============================================================
-   TOKENS & CORE DESIGN SYSTEM
-============================================================ */
-:root {
-  --ink: #0a0908;
-  --ink-2: #120e0c;
-  --wood: #2a1c12;
-  --wood-light: #4a301c;
-  --wood-grain: #1c130c;
-  --lacquer: #6e1c1c;
-  --lacquer-deep: #3d0f0f;
-  --lacquer-bright: #a3311f;
-  --gold: #c9a24c;
-  --gold-bright: #eccf82;
-  --gold-dim: #8a6f36;
-  --jade: #3f6659;
-  --jade-bright: #6fa08d;
-  --parchment: #ece2c6;
-  --parchment-dim: #c9bd9c;
-  --azure-glow: rgba(56, 189, 248, 0.4);
-  --discord-blurple: #5865f2;
-  --discord-glow: rgba(88, 101, 242, 0.4);
-  --glass-fill: rgba(236,226,198,0.05);
-  --glass-fill-strong: rgba(236,226,198,0.09);
-  --glass-border: rgba(236,226,198,0.14);
-  --shadow-deep: 0 30px 80px rgba(0,0,0,0.6);
-  --display: "Shippori Mincho", serif;
-  --body: "Cormorant Garamond", serif;
-  --mono: "IBM Plex Mono", monospace;
-  --ease: cubic-bezier(.22,.68,0,1);
-}
+    .telemetry-card {
+      background: rgba(10, 14, 26, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 12px 18px;
+      color: #fff;
+    }
 
-*, *::before, *::after {
-  margin: 0; padding: 0; box-sizing: border-box;
-}
+    .speed-display {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1;
+      font-family: "Courier New", Courier, monospace;
+    }
+    .speed-unit {
+      font-size: 13px;
+      color: #94a3b8;
+      font-weight: 600;
+      margin-left: 4px;
+    }
 
-html {
-  scroll-behavior: smooth;
-  background-color: var(--ink);
-  -webkit-text-size-adjust: 100%;
-}
+    .nitro-container {
+      margin-top: 8px;
+      width: 160px;
+    }
+    .nitro-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #38bdf8;
+      font-weight: 700;
+      margin-bottom: 3px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .nitro-bar-bg {
+      width: 100%;
+      height: 7px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .nitro-bar-fill {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #0284c7, #38bdf8, #a855f7);
+      box-shadow: 0 0 10px #38bdf8;
+      transition: width 0.1s linear;
+    }
 
-::selection {
-  background: var(--gold-dim);
-  color: var(--ink);
-}
+    .score-card {
+      text-align: right;
+    }
+    .score-val {
+      font-size: 26px;
+      font-weight: 800;
+      color: #facc15;
+      font-family: "Courier New", Courier, monospace;
+    }
+    .score-label {
+      font-size: 11px;
+      color: #94a3b8;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
 
-body {
-  background: var(--ink);
-  color: var(--parchment);
-  font-family: var(--body);
-  overflow-x: hidden;
-  cursor: default;
-  position: relative;
-  min-height: 100vh;
-}
+    .drift-banner {
+      align-self: center;
+      margin-top: 10px;
+      text-align: center;
+      opacity: 0;
+      transform: scale(0.9);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .drift-banner.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .drift-text {
+      font-size: 24px;
+      font-weight: 900;
+      color: #f97316;
+      text-shadow: 0 0 12px rgba(249, 115, 22, 0.8);
+      font-style: italic;
+    }
+    .drift-combo {
+      font-size: 14px;
+      color: #fef08a;
+      font-weight: 700;
+    }
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
+    /* Top Controls Row */
+    .top-controls {
+      display: flex;
+      gap: 8px;
+      pointer-events: auto;
+    }
+    .hud-btn {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f8fafc;
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      pointer-events: auto;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .hud-btn:active {
+      background: rgba(56, 189, 248, 0.4);
+      border-color: #38bdf8;
+    }
 
-a { color: inherit; text-decoration: none; }
-img, svg { display: block; max-width: 100%; }
-button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    /* Touch Controls Overlay */
+    #touch-controls {
+      display: none;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 220px;
+      pointer-events: none;
+      z-index: 20;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 20px 24px;
+    }
 
-/* Ambient wood-grain + atmospheric lighting */
-body::before {
-  content: "";
-  position: fixed; inset: 0; z-index: -2;
-  background:
-    radial-gradient(ellipse 120% 80% at 50% -10%, rgba(163,49,31,0.14), transparent 60%),
-    repeating-linear-gradient(100deg, rgba(0,0,0,0.35) 0px, rgba(0,0,0,0.35) 1px, transparent 2px, transparent 7px),
-    linear-gradient(160deg, var(--wood-grain) 0%, var(--ink) 55%, #0a0705 100%);
-  background-color: var(--ink);
-}
+    .touch-cluster-left {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      pointer-events: auto;
+    }
+    .joystick-base {
+      position: absolute;
+      width: 130px;
+      height: 130px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .joystick-knob {
+      width: 54px;
+      height: 54px;
+      background: radial-gradient(circle, #38bdf8, #0284c7);
+      border-radius: 50%;
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.6);
+      transform: translate(0, 0);
+      pointer-events: none;
+    }
 
-body::after {
-  content: "";
-  position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background:
-    radial-gradient(ellipse 60% 40% at 15% 10%, rgba(201,162,76,0.06), transparent 60%),
-    radial-gradient(ellipse 50% 40% at 90% 85%, rgba(63,102,89,0.07), transparent 60%);
-  mix-blend-mode: screen;
-}
+    .touch-cluster-right {
+      display: grid;
+      grid-template-columns: 70px 70px;
+      grid-template-rows: 70px 70px;
+      gap: 12px;
+      pointer-events: auto;
+    }
+    .touch-btn {
+      background: rgba(15, 23, 42, 0.7);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 800;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .touch-btn.active {
+      background: #38bdf8;
+      border-color: #e0f2fe;
+      color: #030712;
+      transform: scale(0.94);
+    }
+    .touch-btn.btn-nitro {
+      border-color: #a855f7;
+    }
+    .touch-btn.btn-nitro.active {
+      background: #c084fc;
+    }
+    .touch-btn.btn-drift {
+      border-color: #f97316;
+    }
+    .touch-btn.btn-drift.active {
+      background: #fb923c;
+    }
 
-/* Global Dragon Canvas: Follows pointer/touch across whole page */
-#dragonCanvas {
-  position: fixed; inset: 0; width: 100vw; height: 100vh;
-  z-index: 0; pointer-events: none; opacity: 0.95;
-}
+    /* Start / Overlay */
+    #start-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, rgba(15, 23, 42, 0.85) 0%, rgba(2, 6, 23, 0.98) 100%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+    }
+    #start-screen h1 {
+      font-size: 48px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #38bdf8, #818cf8, #f43f5e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    #start-screen p {
+      color: #94a3b8;
+      max-width: 480px;
+      font-size: 15px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .start-prompt {
+      background: linear-gradient(90deg, #0284c7, #2563eb);
+      color: #fff;
+      padding: 14px 36px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 17px;
+      box-shadow: 0 0 24px rgba(37, 99, 235, 0.6);
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.04); opacity: 0.85; }
+    }
+    .instructions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      max-width: 440px;
+      margin-top: 24px;
+      text-align: left;
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+    .inst-card {
+      background: rgba(255,255,255,0.06);
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .inst-card b {
+      color: #38bdf8;
+      display: block;
+      margin-bottom: 4px;
+    }
+  </style>
 
-/* Background Floating Embers / Celestial Dust */
-#particleCanvas {
-  position: fixed; inset: 0; width: 100vw; height: 100vh;
-  z-index: 0; pointer-events: none; opacity: 0.7;
-}
-
-/* ============================================================
-   PRELOADER — GUARANTEED CSS AUTO-DISMISS FAILSAFE
-============================================================ */
-@keyframes preloaderAutoDismiss {
-  0%, 82% { opacity: 1; visibility: visible; }
-  100% { opacity: 0; visibility: hidden; pointer-events: none; }
-}
-
-#preloader {
-  position: fixed; inset: 0; z-index: 9999;
-  background: radial-gradient(circle at 50% 45%, #18110c 0%, #0a0908 85%);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  transition: opacity 0.8s var(--ease), visibility 0.8s var(--ease), transform 0.8s var(--ease);
-  cursor: pointer; user-select: none;
-  animation: preloaderAutoDismiss 2.0s cubic-bezier(.22,.68,0,1) 1.2s forwards;
-}
-#preloader.done {
-  opacity: 0 !important; visibility: hidden !important; pointer-events: none !important;
-  transform: scale(1.04);
-}
-
-.seal-container {
-  position: relative; width: 140px; height: 140px;
-  display: flex; align-items: center; justify-content: center;
-}
-.seal-orbit {
-  position: absolute; border-radius: 50%;
-  pointer-events: none;
-}
-.seal-orbit.ring-outer {
-  inset: -14px;
-  border: 1px dashed rgba(201,162,76,0.45);
-  animation: spin 35s linear infinite;
-}
-.seal-orbit.ring-mid {
-  inset: -6px;
-  border: 1px solid rgba(163,49,31,0.35);
-  animation: spinReverse 25s linear infinite;
-}
-.seal {
-  width: 120px; height: 120px; border-radius: 50%;
-  border: 2px solid var(--gold-dim);
-  background: radial-gradient(circle at 40% 35%, rgba(201,162,76,0.2), rgba(110,28,28,0.35) 70%, transparent 100%);
-  display: flex; align-items: center; justify-content: center;
-  position: relative;
-  box-shadow: 0 0 35px rgba(201,162,76,0.25), inset 0 0 20px rgba(110,28,28,0.4);
-  animation: sealPulse 2.4s var(--ease) infinite;
-}
-.seal span {
-  font-family: var(--display);
-  font-size: 2.8rem; font-weight: 800;
-  color: var(--gold-bright);
-  transform: scaleX(-1);
-  text-shadow: 0 0 16px rgba(236,207,130,0.6);
-}
-@keyframes sealPulse {
-  0%,100% { box-shadow: 0 0 20px rgba(201,162,76,0.15); transform: scale(1); }
-  50% { box-shadow: 0 0 45px 12px rgba(201,162,76,0.35); transform: scale(1.03); }
-}
-@keyframes spin { to { transform: rotate(360deg); }}
-@keyframes spinReverse { to { transform: rotate(-360deg); }}
-
-.preload-title {
-  margin-top: 26px;
-  font-family: var(--display); font-size: 1.15rem; letter-spacing: 0.28em;
-  color: var(--gold-bright); text-transform: uppercase; font-weight: 600;
-}
-
-.preload-progress-track {
-  width: 220px; height: 3px; border-radius: 99px;
-  background: rgba(255,255,255,0.08);
-  margin-top: 18px; overflow: hidden; position: relative;
-  border: 1px solid rgba(201,162,76,0.25);
-}
-.preload-progress-bar {
-  height: 100%; width: 0%;
-  background: linear-gradient(90deg, var(--lacquer-bright), var(--gold-bright), #38bdf8);
-  border-radius: 99px;
-  box-shadow: 0 0 12px var(--gold-bright);
-  transition: width 0.25s ease-out;
-}
-
-.preload-caption {
-  margin-top: 14px;
-  font-family: var(--mono); letter-spacing: 0.22em; font-size: 0.65rem;
-  color: var(--parchment-dim); text-transform: uppercase;
-  min-height: 1.2em; text-align: center;
-}
-.preload-tap-hint {
-  margin-top: 22px;
-  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.18em;
-  color: var(--gold-dim); opacity: 0.7; text-transform: uppercase;
-  animation: pulseHint 1.8s infinite alternate ease-in-out;
-}
-@keyframes pulseHint {
-  from { opacity: 0.4; } to { opacity: 0.95; }
-}
-
-/* ============================================================
-   NAVIGATION RAIL
-============================================================ */
-.railnav {
-  position: fixed; right: 26px; top: 50%; transform: translateY(-50%);
-  z-index: 500; display: flex; flex-direction: column; gap: 16px;
-  align-items: flex-end;
-}
-.railnav a {
-  display: flex; align-items: center; gap: 10px;
-}
-.railnav .dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--gold-dim);
-  transition: all .4s var(--ease);
-}
-.railnav a:hover .dot, .railnav a.active .dot {
-  background: var(--gold-bright);
-  box-shadow: 0 0 12px 3px rgba(236,207,130,0.6);
-  transform: scale(1.45);
-}
-.railnav .rlabel {
-  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.2em;
-  color: var(--parchment-dim); opacity: 0; transform: translateX(8px);
-  transition: all .35s var(--ease); text-transform: uppercase; white-space: nowrap;
-}
-.railnav a:hover .rlabel, .railnav a.active .rlabel {
-  opacity: 1; transform: translateX(0); color: var(--gold-bright);
-}
-@media (max-width: 820px) { .railnav { display: none; } }
-
-/* ============================================================
-   AMBIENT AUDIO TOGGLE
-============================================================ */
-#soundToggle {
-  position: fixed; left: 24px; bottom: 24px; z-index: 500;
-  width: 52px; height: 52px; border-radius: 50%;
-  background: var(--glass-fill);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; color: var(--gold-bright);
-  transition: all .4s var(--ease);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.45);
-}
-#soundToggle:hover {
-  transform: translateY(-2px) scale(1.05);
-  border-color: var(--gold-dim);
-  box-shadow: 0 14px 40px rgba(201,162,76,0.25);
-}
-#soundToggle svg { width: 22px; height: 22px; transition: transform .3s var(--ease); }
-#soundToggle .ring, #soundToggle .ring2 {
-  position: absolute; inset: -5px; border-radius: 50%;
-  border: 1px solid rgba(201,162,76,0.35);
-  opacity: 0; transform: scale(0.8); pointer-events: none;
-}
-#soundToggle.playing .ring {
-  animation: soundRing 2.4s var(--ease) infinite;
-}
-#soundToggle.playing .ring2 {
-  animation: soundRing 2.4s var(--ease) 1.2s infinite;
-}
-@keyframes soundRing {
-  0% { opacity: 0.65; transform: scale(0.85); }
-  100% { opacity: 0; transform: scale(1.6); }
-}
-#soundLabel {
-  position: fixed; left: 86px; bottom: 39px; z-index: 500;
-  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.16em;
-  color: var(--parchment-dim); text-transform: uppercase;
-  opacity: 0; transition: opacity .4s, transform .4s;
-  pointer-events: none; transform: translateX(-6px);
-}
-#soundToggle:hover ~ #soundLabel, #soundToggle.playing ~ #soundLabel {
-  opacity: 1; transform: translateX(0);
-}
-
-@media (max-width: 768px) {
-  #soundToggle {
-    left: auto; right: 18px; top: 18px; bottom: auto;
-    width: 44px; height: 44px;
-    background: rgba(18, 14, 12, 0.88);
-  }
-  #soundToggle svg { width: 18px; height: 18px; }
-  #soundLabel {
-    left: auto; right: 70px; top: 30px; bottom: auto;
-    font-size: 0.55rem;
-  }
-}
-
-/* ============================================================
-   SHARED MATERIAL & LAYOUT
-============================================================ */
-section {
-  position: relative; z-index: 1;
-  padding: clamp(55px, 12vw, 130px) clamp(16px, 6vw, 84px);
-}
-
-.eyebrow {
-  font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.32em;
-  text-transform: uppercase; color: var(--gold-dim);
-  display: flex; align-items: center; gap: 14px; margin-bottom: 18px;
-}
-.eyebrow::before {
-  content: ""; width: 32px; height: 1px; background: var(--gold-dim); flex-shrink: 0;
-}
-.hd {
-  font-family: var(--display); font-weight: 600;
-  font-size: clamp(2rem, 4.5vw, 3.8rem);
-  line-height: 1.15; color: var(--parchment);
-  letter-spacing: 0.01em;
-}
-.hd em { font-style: normal; color: var(--gold-bright); }
-
-.panel-seam {
-  height: 50px; position: relative; z-index: 2;
-  background:
-    linear-gradient(180deg, transparent, rgba(0,0,0,0.5)),
-    repeating-linear-gradient(90deg, rgba(0,0,0,0.25) 0 2px, transparent 2px 90px);
-}
-
-.glass {
-  background: linear-gradient(155deg, var(--glass-fill-strong), var(--glass-fill));
-  border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  backdrop-filter: blur(20px) saturate(150%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
-  box-shadow: var(--shadow-deep), inset 0 1px 0 rgba(255,255,255,0.08);
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.45s var(--ease), border-color 0.4s, box-shadow 0.45s;
-  transform-style: preserve-3d;
-}
-
-.glass::before {
-  content: "";
-  position: absolute; top: -60%; left: -20%; width: 70%; height: 220%;
-  background: linear-gradient(100deg, rgba(255,255,255,0.12), transparent 55%);
-  transform: rotate(14deg);
-  pointer-events: none;
-  transition: transform 1.2s var(--ease);
-}
-.glass:hover::before {
-  transform: rotate(14deg) translateX(15%);
-}
-
-/* ============================================================
-   HERO
-============================================================ */
-#hero {
-  min-height: 100svh; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; text-align: center;
-  padding-top: 0; overflow: hidden; position: relative;
-}
-.hero-frame {
-  position: absolute; inset: clamp(10px, 3vw, 20px);
-  border: 1px solid rgba(201,162,76,0.28);
-  pointer-events: none;
-}
-.hero-frame::before, .hero-frame::after,
-.hero-frame i::before, .hero-frame i::after {
-  content: ""; position: absolute; width: clamp(18px, 4vw, 28px); height: clamp(18px, 4vw, 28px);
-  border: 2px solid var(--gold);
-}
-.hero-frame::before { top: -2px; left: -2px; border-right: none; border-bottom: none; }
-.hero-frame::after { top: -2px; right: -2px; border-left: none; border-bottom: none; }
-.hero-frame i::before { bottom: -2px; left: -2px; border-right: none; border-top: none; }
-.hero-frame i::after { bottom: -2px; right: -2px; border-left: none; border-top: none; }
-
-.hero-inner { position: relative; z-index: 3; padding: 0 16px; width: 100%; max-width: 900px; }
-.hero-kicker {
-  font-family: var(--mono); font-size: clamp(0.62rem, 1.8vw, 0.72rem); letter-spacing: 0.4em;
-  color: var(--jade-bright); text-transform: uppercase; margin-bottom: 20px;
-}
-.hero-title {
-  font-family: var(--display); font-weight: 800;
-  font-size: clamp(3.2rem, 13vw, 9.5rem);
-  letter-spacing: 0.05em;
-  background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 48%, var(--lacquer-bright) 100%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-  filter: drop-shadow(0 8px 30px rgba(0,0,0,0.65));
-  line-height: 0.95;
-}
-.hero-glyph {
-  font-family: var(--display); font-size: clamp(1.2rem, 3vw, 2rem);
-  color: var(--parchment-dim); letter-spacing: 0.45em; margin-top: 14px;
-}
-.hero-sub {
-  max-width: 580px; margin: 28px auto 0; font-size: clamp(1.05rem, 2.4vw, 1.2rem);
-  font-style: italic; color: var(--parchment-dim); line-height: 1.75;
-}
-.hero-sub b { color: var(--gold-bright); font-weight: 600; font-style: normal; }
-
-.scroll-cue {
-  position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
-  z-index: 3;
-}
-.scroll-cue span {
-  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.3em;
-  color: var(--parchment-dim); text-transform: uppercase;
-}
-.scroll-line {
-  width: 1px; height: 38px; background: linear-gradient(var(--gold-bright), transparent);
-  position: relative; overflow: hidden;
-}
-.scroll-line::after {
-  content: ""; position: absolute; top: -38px; left: 0; width: 100%; height: 38px;
-  background: linear-gradient(var(--gold-bright), transparent);
-  animation: scrollDrip 2.2s linear infinite;
-}
-@keyframes scrollDrip { to { top: 38px; }}
-
-/* ============================================================
-   IDENTITY / THE SEAL
-============================================================ */
-#identity {
-  display: grid; grid-template-columns: 0.9fr 1.1fr; gap: clamp(32px, 5vw, 64px); align-items: center;
-}
-@media (max-width: 900px) { #identity { grid-template-columns: 1fr; }}
-
-.id-card { padding: clamp(28px, 5vw, 44px); text-align: center; }
-.id-portrait {
-  width: clamp(120px, 20vw, 150px); height: clamp(120px, 20vw, 150px);
-  margin: 0 auto 22px; border-radius: 50%;
-  background:
-    radial-gradient(circle at 35% 30%, rgba(236,207,130,0.38), transparent 60%),
-    conic-gradient(from 210deg, var(--lacquer), var(--wood-light), var(--jade), var(--lacquer));
-  display: flex; align-items: center; justify-content: center;
-  border: 2px solid var(--gold-dim);
-  position: relative;
-}
-.id-portrait span {
-  font-family: var(--display); font-weight: 800; font-size: clamp(2.2rem, 5vw, 2.7rem); color: var(--parchment);
-  text-shadow: 0 3px 12px rgba(0,0,0,0.6);
-}
-.id-portrait::after {
-  content: ""; position: absolute; inset: -8px; border-radius: 50%;
-  border: 1px dashed rgba(201,162,76,0.45);
-  animation: spin 40s linear infinite;
-}
-
-.id-name { font-family: var(--display); font-weight: 800; font-size: 1.95rem; color: var(--gold-bright); }
-.id-role {
-  font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.2em;
-  color: var(--jade-bright); text-transform: uppercase; margin-top: 6px;
-}
-.id-quote {
-  margin-top: 22px; font-style: italic; color: var(--parchment-dim); font-size: 1.05rem; line-height: 1.7;
-  border-top: 1px solid var(--glass-border); padding-top: 20px;
-}
-
-.id-text p { font-size: clamp(1.1rem, 2.2vw, 1.25rem); line-height: 1.8; color: var(--parchment-dim); margin-bottom: 18px; }
-.id-text b { color: var(--gold-bright); font-weight: 600; }
-.id-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
-.tag {
-  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.08em;
-  padding: 8px 16px; border-radius: 999px; text-transform: uppercase;
-  border: 1px solid var(--glass-border); color: var(--parchment-dim);
-  background: var(--glass-fill);
-  transition: all .35s var(--ease);
-}
-.tag:hover {
-  border-color: var(--gold-dim); color: var(--gold-bright);
-  transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-}
-
-/* ============================================================
-   WORLDS I WANDER — INTEREST ARCHIVE
-============================================================ */
-#worlds .hd { margin-bottom: 12px; }
-.worlds-intro {
-  max-width: 640px; color: var(--parchment-dim); font-size: 1.1rem; line-height: 1.75; margin-bottom: clamp(36px, 6vw, 60px);
-}
-.archive-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(270px,1fr)); gap: clamp(18px, 3vw, 26px);
-}
-.artifact {
-  padding: clamp(24px, 4vw, 34px); min-height: 270px;
-  display: flex; flex-direction: column;
-}
-.artifact:hover {
-  transform: translateY(-6px);
-  border-color: rgba(201,162,76,0.38);
-  box-shadow: 0 20px 45px rgba(0,0,0,0.5), 0 0 24px rgba(201,162,76,0.15);
-}
-.artifact .glyph {
-  font-family: var(--display); font-size: 2.6rem; color: var(--gold-dim);
-  line-height: 1; margin-bottom: 16px; transition: color .4s, transform .4s;
-}
-.artifact:hover .glyph {
-  color: var(--gold-bright);
-  transform: scale(1.08);
-}
-.artifact h3 {
-  font-family: var(--display); font-weight: 600; font-size: 1.5rem; color: var(--parchment); margin-bottom: 5px;
-}
-.artifact .sub {
-  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--jade-bright); margin-bottom: 14px;
-}
-.artifact p { color: var(--parchment-dim); font-size: 1.02rem; line-height: 1.68; flex: 1; }
-.artifact .stamp {
-  align-self: flex-end; margin-top: 18px;
-  font-family: var(--display); font-size: 0.72rem; letter-spacing: 0.2em;
-  color: var(--lacquer-bright); border: 1px solid rgba(163,49,31,0.55);
-  padding: 4px 10px; border-radius: 4px; transform: rotate(-3deg);
-}
-
-/* ============================================================
-   STATUS WINDOW (Isekai Character Sheet)
-============================================================ */
-#status {
-  background: radial-gradient(ellipse 70% 60% at 80% 0%, rgba(110,28,28,0.2), transparent 60%);
-}
-.status-window {
-  max-width: 940px; margin: 0 auto; padding: 0; overflow: hidden;
-}
-.sw-top {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: clamp(16px, 3vw, 22px) clamp(18px, 4vw, 32px);
-  border-bottom: 1px solid var(--glass-border);
-  background: rgba(0,0,0,0.25);
-}
-.sw-top .t1 {
-  font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.22em;
-  color: var(--gold-bright); text-transform: uppercase;
-}
-.sw-top .t2 { font-family: var(--mono); font-size: 0.62rem; color: var(--parchment-dim); }
-.sw-dots { display: flex; gap: 6px; }
-.sw-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--gold-dim); display: block; }
-
-.sw-body {
-  padding: clamp(24px, 5vw, 42px); display: grid; grid-template-columns: 1.1fr 0.9fr; gap: clamp(24px, 4vw, 46px);
-}
-@media (max-width: 760px) {
-  .sw-body { grid-template-columns: 1fr; }
-}
-
-.stat-row { margin-bottom: 24px; }
-.stat-row:last-child { margin-bottom: 0; }
-.stat-label {
-  display: flex; justify-content: space-between; align-items: baseline;
-  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--parchment-dim); margin-bottom: 9px;
-}
-.stat-label b {
-  color: var(--gold-bright); font-family: var(--display); font-size: 0.98rem;
-  letter-spacing: 0.02em; text-transform: none;
-}
-.stat-bar {
-  height: 8px; border-radius: 99px; background: rgba(255,255,255,0.06);
-  overflow: hidden; position: relative; border: 1px solid var(--glass-border);
-}
-.stat-fill {
-  height: 100%; border-radius: 99px; width: 0%;
-  background: linear-gradient(90deg, var(--lacquer), var(--gold));
-  transition: width 1.4s var(--ease);
-  box-shadow: 0 0 12px rgba(201,162,76,0.45);
-}
-.stat-fill.jade {
-  background: linear-gradient(90deg, var(--jade), var(--jade-bright));
-  box-shadow: 0 0 12px rgba(111,160,141,0.45);
-}
-.stat-note {
-  font-size: 0.92rem; color: var(--parchment-dim); margin-top: 8px;
-  line-height: 1.55; font-style: italic;
-}
-
-.traits-col h4 {
-  font-family: var(--display); font-size: 1.3rem; color: var(--gold-bright);
-  margin-bottom: 16px; font-weight: 600;
-}
-.trait-list { list-style: none; }
-.trait-list li {
-  display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px dashed var(--glass-border);
-  font-size: 0.98rem; color: var(--parchment-dim); line-height: 1.55;
-}
-.trait-list li:last-child { border-bottom: none; }
-.trait-list li .mk { color: var(--lacquer-bright); font-family: var(--display); font-weight: 800; }
-
-.reroll-btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  margin-top: 12px; font-family: var(--mono); font-size: 0.62rem;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  padding: 7px 14px; border-radius: 99px; border: 1px solid var(--glass-border);
-  color: var(--gold-dim); background: var(--glass-fill);
-  transition: all .3s var(--ease);
-}
-.reroll-btn:hover {
-  border-color: var(--gold-bright); color: var(--gold-bright);
-  background: rgba(201,162,76,0.1); transform: translateY(-2px);
-}
-
-.class-banner {
-  grid-column: 1/-1; margin-top: 4px; padding-top: 24px; border-top: 1px solid var(--glass-border);
-  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
-}
-.class-banner .badge {
-  font-family: var(--display); font-weight: 800; font-size: 1.45rem; color: var(--ink);
-  background: linear-gradient(135deg, var(--gold-bright), var(--gold));
-  padding: 8px 20px; border-radius: 8px; box-shadow: 0 8px 24px rgba(201,162,76,0.3);
-  white-space: nowrap;
-}
-.class-banner p {
-  color: var(--parchment-dim); font-size: 1rem; line-height: 1.65; max-width: 520px;
-}
-
-/* ============================================================
-   CONNECT SECTION — MOBILE HARMONY & INTEGRATED TALISMAN
-============================================================ */
-#connect {
-  display: grid; grid-template-columns: 1fr 1fr; gap: clamp(20px, 4vw, 36px); align-items: stretch;
-}
-@media (max-width: 900px) {
-  #connect { grid-template-columns: 1fr; }
-}
-
-.connect-card {
-  padding: clamp(22px, 4vw, 38px);
-  display: flex; flex-direction: column;
-  position: relative;
-}
-
-.plat {
-  font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.22em;
-  color: var(--jade-bright); text-transform: uppercase; margin-bottom: 8px;
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 8px; flex-wrap: wrap;
-}
-.plat .plat-title { white-space: nowrap; font-weight: 600; }
-.plat .plat-pill {
-  font-size: 0.58rem; letter-spacing: 0.12em; color: var(--gold-dim);
-  padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(201,162,76,0.25);
-  background: rgba(0,0,0,0.3); white-space: nowrap;
-}
-@media (max-width: 380px) {
-  .plat .plat-pill { display: none; }
-}
-
-.connect-card h3 {
-  font-family: var(--display); font-size: clamp(1.6rem, 3.5vw, 1.95rem);
-  color: var(--parchment); margin-bottom: 10px;
-}
-.connect-card p {
-  color: var(--parchment-dim); font-size: 1.02rem; line-height: 1.7; margin-bottom: 20px;
-}
-
-/* ------------------------------------------------------------
-   THE SACRED QR TALISMAN (SEAMLESSLY WOVEN INTO WEBSITE STYLE)
------------------------------------------------------------- */
-.talisman-wrap {
-  margin: 6px auto 22px auto;
-  width: 100%; max-width: 310px;
-  position: relative;
-}
-
-.talisman-frame {
-  position: relative;
-  background:
-    radial-gradient(ellipse 90% 80% at 50% -10%, rgba(56, 189, 248, 0.16), transparent 70%),
-    linear-gradient(165deg, rgba(26, 20, 24, 0.92) 0%, rgba(14, 11, 10, 0.95) 50%, rgba(18, 22, 34, 0.92) 100%);
-  border: 1px solid rgba(201,162,76,0.45);
-  border-radius: 20px;
-  padding: 22px 18px 18px;
-  box-shadow:
-    0 24px 60px rgba(0,0,0,0.7),
-    0 0 35px rgba(56,189,248,0.18),
-    inset 0 1px 0 rgba(255,255,255,0.12),
-    inset 0 0 25px rgba(201,162,76,0.06);
-  display: flex; flex-direction: column; align-items: center;
-  transition: transform 0.4s var(--ease), box-shadow 0.4s;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-}
-
-.talisman-frame::before, .talisman-frame::after,
-.talisman-corners::before, .talisman-corners::after {
-  content: ""; position: absolute; width: 14px; height: 14px;
-  border: 2px solid var(--gold-bright); pointer-events: none;
-}
-.talisman-frame::before { top: 6px; left: 6px; border-right: none; border-bottom: none; }
-.talisman-frame::after  { top: 6px; right: 6px; border-left: none; border-bottom: none; }
-.talisman-corners::before { bottom: 6px; left: 6px; border-right: none; border-top: none; }
-.talisman-corners::after  { bottom: 6px; right: 6px; border-left: none; border-top: none; }
-
-.talisman-canvas-tile {
-  width: 100%; max-width: 216px;
-  aspect-ratio: 1/1;
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 10px;
-  border: 1px solid rgba(201,162,76,0.4);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-  display: flex; align-items: center; justify-content: center;
-  position: relative;
-}
-
-#instaQrCanvas {
-  width: 100%; height: 100%;
-  display: block; border-radius: 8px;
-}
-
-.talisman-handle {
-  margin-top: 14px;
-  display: flex; align-items: center; gap: 8px;
-  font-family: var(--mono); font-weight: 600;
-  font-size: 1.15rem; letter-spacing: 0.12em;
-  color: var(--gold-bright);
-  text-shadow: 0 0 12px rgba(201,162,76,0.4);
-}
-.talisman-handle .dot-mark {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: var(--jade-bright); box-shadow: 0 0 8px var(--jade-bright);
-}
-.talisman-subtext {
-  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.22em;
-  color: var(--parchment-dim); text-transform: uppercase; margin-top: 4px;
-  opacity: 0.85;
-}
-
-/* ------------------------------------------------------------
-   SYNCHRONIZED FULL-WIDTH ACTION BUTTONS
------------------------------------------------------------- */
-.btn-group-sync {
-  display: flex; flex-direction: column; gap: 10px;
-  margin-top: auto; width: 100%;
-}
-
-@media (min-width: 480px) and (max-width: 900px) {
-  .btn-group-sync { flex-direction: row; }
-  .btn-primary-sync { flex: 1.8; }
-  .btn-copy-chip { flex: 1.2; }
-}
-@media (min-width: 1200px) {
-  .btn-group-sync { flex-direction: row; }
-  .btn-primary-sync { flex: 1.8; }
-  .btn-copy-chip { flex: 1.2; }
-}
-
-.btn-primary-sync {
-  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-  padding: 13px 20px; border-radius: 999px;
-  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em;
-  font-weight: 600; text-transform: uppercase;
-  text-decoration: none; cursor: pointer;
-  transition: all .3s var(--ease);
-  position: relative; overflow: hidden;
-  min-height: 48px;
-}
-.btn-primary-sync:active { transform: scale(0.97); }
-
-.btn-insta {
-  background: linear-gradient(135deg, #1d4ed8 0%, #4338ca 50%, #991b1b 100%);
-  color: #ffffff;
-  border: 1px solid rgba(255,255,255,0.25);
-  box-shadow: 0 8px 24px rgba(67,56,202,0.35);
-}
-.btn-insta:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(67,56,202,0.55), 0 0 15px rgba(201,162,76,0.35);
-  border-color: var(--gold-bright);
-}
-.btn-insta svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
-
-.btn-copy-chip {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 13px 18px; border-radius: 999px;
-  background: var(--glass-fill);
-  border: 1px solid var(--glass-border);
-  color: var(--parchment-dim);
-  font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em;
-  text-transform: uppercase;
-  transition: all .3s var(--ease);
-  min-height: 48px;
-}
-.btn-copy-chip:hover {
-  border-color: var(--gold-bright); color: var(--gold-bright);
-  background: rgba(201,162,76,0.1); transform: translateY(-2px);
-}
-.btn-copy-chip:active { transform: scale(0.97); }
-.btn-copy-chip svg { width: 15px; height: 15px; stroke: currentColor; fill: none; flex-shrink: 0; }
-
-/* ------------------------------------------------------------
-   DISCORD CARD DETAILS (RESPONSIVE SAFE-LAYOUT)
------------------------------------------------------------- */
-.discord-meta-wrap {
-  display: flex; align-items: center; gap: 16px; margin-bottom: 18px;
-}
-.discord-avatar-wrap {
-  width: 62px; height: 62px; border-radius: 50%;
-  background: conic-gradient(from 140deg, var(--lacquer), var(--wood-light), var(--jade));
-  border: 2px solid var(--gold-dim);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--display); font-weight: 800; font-size: 1.7rem; color: var(--parchment);
-  position: relative; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-  flex-shrink: 0;
-}
-.discord-avatar-wrap .status-beacon {
-  position: absolute; bottom: 1px; right: 1px;
-  width: 14px; height: 14px; border-radius: 50%;
-  background: #23a55a; border: 2px solid var(--ink);
-  box-shadow: 0 0 10px #23a55a;
-}
-.discord-titles h4 {
-  font-family: var(--display); font-size: 1.55rem; color: var(--gold-bright); font-weight: 700;
-  line-height: 1.1;
-}
-.discord-titles .disc-handle {
-  font-family: var(--mono); font-size: 0.76rem; color: var(--parchment-dim); margin-top: 3px;
-}
-.discord-tag-badge {
-  display: inline-block; margin-top: 4px;
-  font-family: var(--mono); font-size: 0.62rem; color: var(--jade-bright);
-  letter-spacing: 0.12em; text-transform: uppercase;
-}
-
-.discord-id-box {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 16px; border-radius: 12px;
-  background: rgba(0,0,0,0.32); border: 1px solid var(--glass-border);
-  margin-bottom: 22px; font-family: var(--mono);
-  gap: 10px; flex-wrap: wrap;
-}
-.discord-id-box .id-label {
-  font-size: 0.64rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-dim);
-  white-space: nowrap;
-}
-.discord-id-box .id-num {
-  font-size: 0.88rem; color: var(--parchment); letter-spacing: 0.06em; font-weight: 500;
-  word-break: break-all;
-}
-
-.btn-discord {
-  background: linear-gradient(135deg, rgba(88,101,242,0.35), rgba(88,101,242,0.18));
-  color: var(--gold-bright);
-  border: 1px solid rgba(88,101,242,0.5);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-}
-.btn-discord:hover {
-  background: linear-gradient(135deg, rgba(88,101,242,0.85), var(--lacquer-bright));
-  color: #ffffff;
-  border-color: var(--gold-bright);
-  box-shadow: 0 12px 30px var(--discord-glow);
-  transform: translateY(-2px);
-}
-.btn-discord svg { width: 20px; height: 20px; fill: currentColor; flex-shrink: 0; }
-
-/* ============================================================
-   TOAST NOTIFICATION
-============================================================ */
-#toastBox {
-  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
-  display: flex; flex-direction: column; gap: 8px;
-  pointer-events: none; max-width: calc(100vw - 48px);
-}
-.toast {
-  padding: 11px 20px; border-radius: 99px;
-  background: rgba(18,14,12,0.94);
-  border: 1px solid var(--gold-dim);
-  color: var(--gold-bright);
-  font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.14em;
-  text-transform: uppercase;
-  backdrop-filter: blur(14px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-  opacity: 0; transform: translateY(14px);
-  transition: all .35s var(--ease);
-}
-.toast.show {
-  opacity: 1; transform: translateY(0);
-}
-
-/* ============================================================
-   FOOTER
-============================================================ */
-footer {
-  padding: clamp(50px, 8vw, 70px) clamp(16px, 6vw, 84px) 40px;
-  text-align: center; position: relative; z-index: 1;
-}
-.foot-seal {
-  width: 66px; height: 66px; margin: 0 auto 18px; border-radius: 50%;
-  border: 1px solid var(--gold-dim); display: flex; align-items: center; justify-content: center;
-  font-family: var(--display); font-weight: 800; color: var(--gold-bright);
-  transform: scaleX(-1); font-size: 1.45rem;
-  box-shadow: 0 0 20px rgba(201,162,76,0.18);
-}
-footer p {
-  font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.18em;
-  color: var(--parchment-dim); text-transform: uppercase;
-}
-footer p.small { margin-top: 8px; opacity: 0.6; font-size: 0.6rem; }
-</style>
+  <!-- Three.js ESM import map -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://esm.sh/three@0.160.0"
+      }
+    }
+  </script>
 </head>
 <body>
 
-<!-- Global Background Canvases: Interactive Dragon & Celestial Particles -->
-<canvas id="dragonCanvas"></canvas>
-<canvas id="particleCanvas"></canvas>
-
-<!-- Detailed, Resilient Preloader (Tap anywhere to enter) -->
-<div id="preloader" onclick="dismissPreloader()" ontouchstart="dismissPreloader()" title="Click or tap to enter immediately">
-  <div class="seal-container">
-    <div class="seal-orbit ring-outer"></div>
-    <div class="seal-orbit ring-mid"></div>
-    <div class="seal"><span>燿</span></div>
-  </div>
-  <div class="preload-title">常世 · THE WANDERING LEDGER</div>
-  <div class="preload-progress-track">
-    <div class="preload-progress-bar" id="preloadBar"></div>
-  </div>
-  <div class="preload-caption" id="preloadStatus">UNROLLING THE SCROLL…</div>
-  <div class="preload-tap-hint">TAP ANYWHERE TO ENTER</div>
-</div>
-
-<!-- Navigation Rail -->
-<nav class="railnav">
-  <a href="#hero" class="active"><span class="rlabel">gate</span><span class="dot"></span></a>
-  <a href="#identity"><span class="rlabel">seal</span><span class="dot"></span></a>
-  <a href="#worlds"><span class="rlabel">worlds</span><span class="dot"></span></a>
-  <a href="#status"><span class="rlabel">status</span><span class="dot"></span></a>
-  <a href="#connect"><span class="rlabel">connect</span><span class="dot"></span></a>
-</nav>
-
-<!-- Audio Controller (Generative Qin Music) -->
-<button id="soundToggle" aria-label="toggle ambient music">
-  <span class="ring"></span>
-  <span class="ring2"></span>
-  <svg id="iconSound" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-    <path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor" stroke="none"/>
-    <path id="wavePath" d="M16 8a5 5 0 0 1 0 8" stroke-linecap="round"/>
-  </svg>
-</button>
-<span id="soundLabel">ambient qin</span>
-
-<!-- Toast Container -->
-<div id="toastBox"></div>
-
-<!-- ======================= HERO ======================= -->
-<section id="hero">
-  <div class="hero-frame"><i></i></div>
-  <div class="hero-inner">
-    <div class="hero-kicker">常世 · a wandering ledger</div>
-    <h1 class="hero-title">YATHIN</h1>
-    <div class="hero-glyph">燿 · YAO · to shine faintly</div>
-    <p class="hero-sub">A student who wandered into every genre and mastered none of them —
-      <b>Re:Zero</b> loyalist, film-reel hoarder, manga margin-scribbler, and a mostly-silent
-      guild member with a randomly-generated personality.</p>
-  </div>
-  <div class="scroll-cue"><span>descend</span><div class="scroll-line"></div></div>
-</section>
-
-<div class="panel-seam"></div>
-
-<!-- ======================= IDENTITY ======================= -->
-<section id="identity">
-  <div class="glass id-card">
-    <div class="id-portrait"><span>Y</span></div>
-    <div class="id-name">Yathin</div>
-    <div class="id-role">mr_yaen · ya._.thin</div>
-    <div class="id-quote">"If I were to kiss you and then go to hell, I would do it —
-      so I could brag to the devils that I tasted heaven without ever entering it."</div>
-  </div>
-
-  <div class="id-text">
-    <div class="eyebrow">the seal</div>
-    <h2 class="hd">Every trade, <em>half-learned</em>. Every world, <em>half-lived in</em>.</h2>
-    <p>Currently a <b>student</b> by daylight and an <b>archivist of fictional worlds</b> by
-      every other hour. I don't collect hobbies so much as I get quietly absorbed by them —
-      a little of everything, mastery of nothing, and I've made an uneasy peace with that.</p>
-    <p>Around people I run <b>low on social battery</b> and high on overthinking; around a
-      screen, a book, or a soundtrack, the battery seems infinite.</p>
-    <div class="id-tags">
-      <span class="tag">Student</span>
-      <span class="tag">Isekai apologist</span>
-      <span class="tag">Jack of all trades</span>
-      <span class="tag">Chronically online, quietly</span>
-      <span class="tag">Random.exe</span>
+  <div id="start-screen">
+    <h1>VELOCE 3D</h1>
+    <p>Zero-asset procedural 3D racing with dynamic physics, drift combos, and synth audio.</p>
+    <div class="start-prompt">TAP OR CLICK TO RACE</div>
+    <div class="instructions-grid">
+      <div class="inst-card">
+        <b>PC Controls</b>
+        WASD / Arrows: Steer & Drive<br>
+        SPACE: Drift / E-Brake<br>
+        SHIFT: Nitro Boost<br>
+        C: Toggle Camera
+      </div>
+      <div class="inst-card">
+        <b>Phone Controls</b>
+        Left: Touch Joystick<br>
+        Right: Gas / Brake buttons<br>
+        DRIFT & NITRO triggers<br>
+        Auto-adjusts 60 FPS
+      </div>
     </div>
   </div>
-</section>
 
-<div class="panel-seam"></div>
-
-<!-- ======================= WORLDS I WANDER ======================= -->
-<section id="worlds">
-  <div class="eyebrow">the archive</div>
-  <h2 class="hd">Worlds I Wander</h2>
-  <p class="worlds-intro">Five shelves in the same room — each one worn down at the
-    edges from overuse, none of them ever fully closed.</p>
-
-  <div class="archive-grid">
-    <div class="artifact glass">
-      <div class="glyph">環</div>
-      <h3>Anime</h3>
-      <div class="sub">The Home Shelf</div>
-      <p>Genre-omnivorous — classics, romance, shounen, seinen, and everything the
-        algorithm dares to recommend at 2AM. But there is one banner above the rest:
-        <b>Re:Zero</b>. Subaru's suffering is basically a personality trait I've adopted
-        by proxy.</p>
-      <span class="stamp">再開始</span>
-    </div>
-
-    <div class="artifact glass">
-      <div class="glyph">冊</div>
-      <h3>Manga</h3>
-      <div class="sub">The Margin Notes</div>
-      <p>Read faster than the anime can adapt, mostly out of impatience. The panel gutters
-        are where the real pacing lives, and I will absolutely spoil myself just to know
-        how it ends.</p>
-      <span class="stamp">既読</span>
-    </div>
-
-    <div class="artifact glass">
-      <div class="glyph">龍</div>
-      <h3>Donghua</h3>
-      <div class="sub">The Neighbor Shelf</div>
-      <p>Chinese animation's wuxia sensibilities and cultivation arcs scratch an itch
-        anime doesn't reach — slower burns, heavier mythology, gorgeous ink-wash
-        backgrounds.</p>
-      <span class="stamp">修真</span>
-    </div>
-
-    <div class="artifact glass">
-      <div class="glyph">映</div>
-      <h3>Film</h3>
-      <div class="sub">The Screening Room</div>
-      <p>A movie lover in the old-fashioned sense — I'll sit through the slow ones for
-        one good shot. Novels-turned-films get watched twice: once for the story,
-        once to judge the adaptation.</p>
-      <span class="stamp">上映中</span>
-    </div>
-
-    <div class="artifact glass">
-      <div class="glyph">頁</div>
-      <h3>Novels</h3>
-      <div class="sub">The Quiet Shelf</div>
-      <p>Where imagination gets to do the animation studio's job for free. Reading is the
-        one hobby that asks nothing of my social battery and gives everything back.</p>
-      <span class="stamp">続巻</span>
-    </div>
-
-    <div class="artifact glass">
-      <div class="glyph">拙</div>
-      <h3>Everything Else</h3>
-      <div class="sub">The Junk Drawer</div>
-      <p>Whatever hobby wandered in last — a little music, a little tinkering, a little
-        of anything that looked interesting for a week. The junk drawer is the most
-        honest shelf in the room.</p>
-      <span class="stamp">雑</span>
-    </div>
-  </div>
-</section>
-
-<div class="panel-seam"></div>
-
-<!-- ======================= STATUS WINDOW ======================= -->
-<section id="status">
-  <div class="eyebrow">the status window</div>
-  <h2 class="hd">Summoned as: <em>Support-type, Unclassed</em></h2>
-  <br>
-  <div class="status-window glass">
-    <div class="sw-top">
-      <span class="t1">Character Sheet</span>
-      <div class="sw-dots"><i></i><i></i><i></i></div>
-      <span class="t2">save point: today</span>
-    </div>
-    <div class="sw-body">
-      <div>
-        <div class="stat-row">
-          <div class="stat-label">
-            <span>Personality</span>
-            <b id="personalityVal">Random</b>
+  <div id="hud">
+    <div class="hud-top">
+      <div class="telemetry-card">
+        <div>
+          <span class="speed-display" id="hud-speed">0</span>
+          <span class="speed-unit">KM/H</span>
+        </div>
+        <div class="nitro-container">
+          <div class="nitro-label">
+            <span>NITRO</span>
+            <span id="hud-nitro-val">100%</span>
           </div>
-          <div class="stat-bar"><div class="stat-fill" id="personalityFill" data-target="70"></div></div>
-          <div class="stat-note" id="personalityNote">No fixed build — mood, humor, and energy re-roll daily. Consistency was never the point.</div>
-          <button class="reroll-btn" id="rerollPersonality">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
-            </svg>
-            Reroll Build
-          </button>
-        </div>
-        <div class="stat-row">
-          <div class="stat-label"><span>Social Skills</span><b>Low</b></div>
-          <div class="stat-bar"><div class="stat-fill jade" data-target="24"></div></div>
-          <div class="stat-note">Excellent in comment sections and Discord DMs. Loading screen appears before any real-life small talk.</div>
-        </div>
-        <div class="stat-row">
-          <div class="stat-label"><span>Skill Spread</span><b>Jack of All Trades</b></div>
-          <div class="stat-bar"><div class="stat-fill" data-target="88"></div></div>
-          <div class="stat-note">Wide skill tree, no capstone talent unlocked yet — and no plans to pick just one.</div>
+          <div class="nitro-bar-bg">
+            <div class="nitro-bar-fill" id="hud-nitro-fill"></div>
+          </div>
         </div>
       </div>
 
-      <div class="traits-col">
-        <h4>Passive Traits</h4>
-        <ul class="trait-list">
-          <li><span class="mk">一</span> Re:Zero brain — every plot twist gets compared to Subaru's timeline.</li>
-          <li><span class="mk">二</span> Genre-omnivore — will try any anime, manga, novel, or donghua once.</li>
-          <li><span class="mk">三</span> Battery drains in crowds, recharges in fiction.</li>
-          <li><span class="mk">四</span> Starts hobbies faster than they finish them.</li>
-        </ul>
+      <div class="drift-banner" id="hud-drift-banner">
+        <div class="drift-text" id="hud-drift-score">+0 DRIFT</div>
+        <div class="drift-combo" id="hud-drift-combo">1.0x MULTIPLIER</div>
       </div>
 
-      <div class="class-banner">
-        <span class="badge">Class: Wanderer</span>
-        <p>No main quest line — just a long list of side quests I picked up because they
-          looked interesting, and never quite dropped.</p>
+      <div class="telemetry-card score-card">
+        <div class="score-label">TOTAL SCORE</div>
+        <div class="score-val" id="hud-total-score">0</div>
+        <div class="top-controls" style="margin-top: 8px;">
+          <button class="hud-btn" id="btn-cam">📹 CAM</button>
+          <button class="hud-btn" id="btn-color">🎨 COLOR</button>
+          <button class="hud-btn" id="btn-sound">🔊 ON</button>
+        </div>
       </div>
     </div>
   </div>
-</section>
 
-<div class="panel-seam"></div>
-
-<!-- ======================= CONNECT ======================= -->
-<section id="connect">
-  <div style="grid-column: 1/-1;">
-    <div class="eyebrow">leave a mark</div>
-    <h2 class="hd" style="margin-bottom: 28px;">Connect &amp; Follow</h2>
-  </div>
-
-  <!-- INSTAGRAM CARD (ORNATE INTEGRATED TALISMAN + CELESTIAL BLUE QR) -->
-  <div class="connect-card glass">
-    <div class="plat">
-      <span class="plat-title">Instagram Nametag</span>
-      <span class="plat-pill">SCANNABLE QR</span>
-    </div>
-    <h3>@ya._.thin</h3>
-    <p>In sleep mode more often than not, but the QR still opens the door. Currently
-      watching Re:Zero — obviously.</p>
-
-    <!-- Handcrafted Talisman QR Shrine (Woven into Site Theme + Blue Dots) -->
-    <div class="talisman-wrap">
-      <div class="talisman-frame" id="talismanFrame">
-        <div class="talisman-corners"></div>
-        <div class="talisman-canvas-tile">
-          <canvas id="instaQrCanvas" width="420" height="420"></canvas>
-        </div>
-        <div class="talisman-handle">
-          <span class="dot-mark"></span>
-          <span>@YA._.THIN</span>
-          <span class="dot-mark"></span>
-        </div>
-        <div class="talisman-subtext">常世 · sealed nametag</div>
+  <div id="touch-controls">
+    <div class="touch-cluster-left" id="joystick-zone">
+      <div class="joystick-base">
+        <div class="joystick-knob" id="joystick-knob"></div>
       </div>
     </div>
-
-    <!-- Perfectly synchronized action buttons -->
-    <div class="btn-group-sync">
-      <a href="https://www.instagram.com/ya._.thin/" target="_blank" rel="noopener noreferrer" class="btn-primary-sync btn-insta" id="btnInstaLink">
-        <svg viewBox="0 0 24 24">
-          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-        </svg>
-        <span>Open Instagram Profile</span>
-      </a>
-      <button class="btn-copy-chip" id="copyInstaBtn" title="Copy Instagram username">
-        <svg viewBox="0 0 24 24" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        <span>Copy Handle</span>
-      </button>
+    <div class="touch-cluster-right">
+      <button class="touch-btn btn-nitro" id="btn-touch-nitro">⚡<br><small>BOOST</small></button>
+      <button class="touch-btn" id="btn-touch-gas">▲<br><small>GAS</small></button>
+      <button class="touch-btn btn-drift" id="btn-touch-drift">⮑<br><small>DRIFT</small></button>
+      <button class="touch-btn" id="btn-touch-brake">▼<br><small>REV</small></button>
     </div>
   </div>
 
-  <!-- DISCORD CARD (MATCHING THEME & SAFE MOBILE LAYOUT) -->
-  <div class="connect-card discord-card glass">
-    <div class="plat">
-      <span class="plat-title">Discord Sanctuary</span>
-      <span class="plat-pill">VERIFIED ID</span>
-    </div>
+  <canvas id="game-canvas"></canvas>
 
-    <div class="discord-meta-wrap">
-      <div class="discord-avatar-wrap">
-        <span>Y</span>
-        <div class="status-beacon" title="Online / Active"></div>
-      </div>
-      <div class="discord-titles">
-        <h4>YATHIN</h4>
-        <div class="disc-handle">mr_yaen</div>
-        <div class="discord-tag-badge">Guild Member Since 2024</div>
-      </div>
-    </div>
+  <script type="module">
+    import * as THREE from 'three';
 
-    <p>Low social battery in voice chat, unlimited in text — find me lurking in whatever
-      server has the best fan theories, coding bots, or cultivation debates.</p>
-
-    <!-- Discord Account ID box -->
-    <div class="discord-id-box">
-      <span class="id-label">Discord User ID</span>
-      <span class="id-num">1285791141266063475</span>
-    </div>
-
-    <!-- Synchronized Discord action buttons -->
-    <div class="btn-group-sync">
-      <a href="https://discord.com/users/1285791141266063475" target="_blank" rel="noopener noreferrer" class="btn-primary-sync btn-discord" id="btnDiscordLink">
-        <svg viewBox="0 0 24 24">
-          <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.893.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
-        </svg>
-        <span>Open Discord Profile</span>
-      </a>
-      <button class="btn-copy-chip" id="copyDiscordBtn" title="Copy Discord User ID">
-        <svg viewBox="0 0 24 24" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        <span>Copy ID</span>
-      </button>
-    </div>
-  </div>
-</section>
-
-<!-- ======================= FOOTER ======================= -->
-<footer>
-  <div class="foot-seal">燿</div>
-  <p>Yathin · 常世 the wandering ledger</p>
-  <p class="small">a jack of all trades, sealed in wood, gold &amp; glass</p>
-</footer>
-
-<!-- ============================================================
-     SCRIPTS & INTERACTIONS
-============================================================ */
-<script>
-/* ------------------------------------------------------------
-   1. TOAST NOTIFICATION UTILITY
------------------------------------------------------------- */
-function showToast(msg) {
-  const box = document.getElementById('toastBox');
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.textContent = msg;
-  box.appendChild(t);
-  requestAnimationFrame(() => t.classList.add('show'));
-  setTimeout(() => {
-    t.classList.remove('show');
-    setTimeout(() => t.remove(), 400);
-  }, 2400);
-}
-
-/* ------------------------------------------------------------
-   2. COPY ACTIONS (INSTAGRAM HANDLE & DISCORD ID)
------------------------------------------------------------- */
-document.getElementById('copyInstaBtn').addEventListener('click', () => {
-  navigator.clipboard.writeText('@ya._.thin').then(() => {
-    showToast('Copied: @ya._.thin');
-  }).catch(() => {
-    showToast('Instagram: @ya._.thin');
-  });
-});
-
-document.getElementById('copyDiscordBtn').addEventListener('click', () => {
-  navigator.clipboard.writeText('1285791141266063475').then(() => {
-    showToast('Copied ID: 1285791141266063475');
-  }).catch(() => {
-    showToast('Discord: 1285791141266063475');
-  });
-});
-
-/* ------------------------------------------------------------
-   3. PRELOADER DYNAMIC PROGRESS ANIMATION
------------------------------------------------------------- */
-let loadProgress = 0;
-const pBar = document.getElementById('preloadBar');
-const pStatus = document.getElementById('preloadStatus');
-const statuses = [
-  "GRINDING PINE SOOT INK…",
-  "UNROLLING THE WANDERING LEDGER…",
-  "AWAKENING THE CELESTIAL DRAGON…",
-  "REALM UNLOCKED · ENTERING…"
-];
-
-const pInterval = setInterval(() => {
-  loadProgress += Math.random() * 26 + 18;
-  if (loadProgress > 100) loadProgress = 100;
-  if (pBar) pBar.style.width = loadProgress + '%';
-  const statusIdx = Math.min(Math.floor((loadProgress / 100) * statuses.length), statuses.length - 1);
-  if (pStatus) pStatus.textContent = statuses[statusIdx];
-  if (loadProgress >= 100) {
-    clearInterval(pInterval);
-    setTimeout(dismissPreloader, 280);
-  }
-}, 100);
-
-/* ------------------------------------------------------------
-   4. GSAP SCROLLTRIGGER & REVEAL ANIMATIONS
------------------------------------------------------------- */
-if (window.gsap && window.ScrollTrigger) {
-  gsap.registerPlugin(ScrollTrigger);
-
-  gsap.utils.toArray('section').forEach(sec => {
-    gsap.from(sec.querySelectorAll('.eyebrow, .hd'), {
-      scrollTrigger: {
-        trigger: sec,
-        start: 'top 85%',
-        toggleActions: 'play none none none'
-      },
-      opacity: 0,
-      y: 30,
-      duration: 1.0,
-      stagger: 0.14,
-      ease: 'power3.out'
-    });
-  });
-
-  gsap.from('.artifact', {
-    scrollTrigger: {
-      trigger: '#worlds',
-      start: 'top 78%',
-      toggleActions: 'play none none none'
-    }},
-    opacity: 0,
-    y: 35,
-    duration: 0.85,
-    stagger: 0.1,
-    ease: 'power3.out'
-  );
-
-  gsap.from('.status-window', {
-    scrollTrigger: {
-      trigger: '#status',
-      start: 'top 78%',
-      toggleActions: 'play none none none'
-    }},
-    opacity: 0,
-    y: 40,
-    duration: 1.1,
-    ease: 'power3.out'
-  );
-
-  gsap.utils.toArray('.stat-fill').forEach(bar => {
-    const target = bar.getAttribute('data-target');
-    ScrollTrigger.create({
-      trigger: bar,
-      start: 'top 92%',
-      onEnter: () => { bar.style.width = target + '%'; }
-    });
-  });
-
-  gsap.from('.connect-card', {
-    scrollTrigger: {
-      trigger: '#connect',
-      start: 'top 78%',
-      toggleActions: 'play none none none'
-    }},
-    opacity: 0,
-    y: 35,
-    duration: 1.0,
-    stagger: 0.18,
-    ease: 'power3.out'
-  );
-} else {
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if(e.isIntersecting) {
-        e.target.style.opacity = '1';
-        e.target.style.transform = 'translateY(0)';
+    /* ======================================================================
+       1. WEB AUDIO PROCEDURAL SYNTHESIZER (ZERO ASSET AUDIO)
+       ====================================================================== */
+    class ProceduralAudio {
+      constructor() {
+        this.ctx = null;
+        this.initialized = false;
+        this.enabled = true;
       }
-    });
-  }, { threshold: 0.15 });
-  document.querySelectorAll('.glass, .artifact, .id-card, .status-window').forEach(el => io.observe(el));
 
-  const ioBars = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if(e.isIntersecting) {
-        const t = e.target.getAttribute('data-target');
-        e.target.style.width = t + '%';
+      init() {
+        if (this.initialized) return;
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        this.ctx = new AudioCtx();
+
+        // 1. Engine Dual-Oscillator with Lowpass Filter
+        this.engineGain = this.ctx.createGain();
+        this.engineGain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+
+        this.filter = this.ctx.createBiquadFilter();
+        this.filter.type = 'lowpass';
+        this.filter.frequency.setValueAtTime(150, this.ctx.currentTime);
+        this.filter.Q.setValueAtTime(3.0, this.ctx.currentTime);
+
+        this.oscSaw = this.ctx.createOscillator();
+        this.oscSaw.type = 'sawtooth';
+        this.oscSaw.frequency.setValueAtTime(45, this.ctx.currentTime);
+
+        this.oscSub = this.ctx.createOscillator();
+        this.oscSub.type = 'triangle';
+        this.oscSub.frequency.setValueAtTime(22.5, this.ctx.currentTime);
+
+        this.oscSaw.connect(this.filter);
+        this.oscSub.connect(this.filter);
+        this.filter.connect(this.engineGain);
+        this.engineGain.connect(this.ctx.destination);
+
+        this.oscSaw.start();
+        this.oscSub.start();
+
+        // 2. Tire Squeal Generator (Noise Buffer)
+        this.squealGain = this.ctx.createGain();
+        this.squealGain.gain.setValueAtTime(0.0, this.ctx.currentTime);
+
+        const noiseLen = this.ctx.sampleRate * 1.5;
+        const noiseBuf = this.ctx.createBuffer(1, noiseLen, this.ctx.sampleRate);
+        const data = noiseBuf.getChannelData(0);
+        for (let i = 0; i < noiseLen; i++) data[i] = Math.random() * 2 - 1;
+
+        this.noiseSource = this.ctx.createBufferSource();
+        this.noiseSource.buffer = noiseBuf;
+        this.noiseSource.loop = true;
+
+        this.squealFilter = this.ctx.createBiquadFilter();
+        this.squealFilter.type = 'bandpass';
+        this.squealFilter.frequency.setValueAtTime(1000, this.ctx.currentTime);
+        this.squealFilter.Q.setValueAtTime(6.0, this.ctx.currentTime);
+
+        this.noiseSource.connect(this.squealFilter);
+        this.squealFilter.connect(this.squealGain);
+        this.squealGain.connect(this.ctx.destination);
+        this.noiseSource.start();
+
+        // 3. Nitro Synth
+        this.nitroGain = this.ctx.createGain();
+        this.nitroGain.gain.setValueAtTime(0.0, this.ctx.currentTime);
+        this.nitroOsc = this.ctx.createOscillator();
+        this.nitroOsc.type = 'sawtooth';
+        this.nitroOsc.frequency.setValueAtTime(220, this.ctx.currentTime);
+
+        this.nitroFilter = this.ctx.createBiquadFilter();
+        this.nitroFilter.type = 'highpass';
+        this.nitroFilter.frequency.setValueAtTime(800, this.ctx.currentTime);
+
+        this.nitroOsc.connect(this.nitroFilter);
+        this.nitroFilter.connect(this.nitroGain);
+        this.nitroGain.connect(this.ctx.destination);
+        this.nitroOsc.start();
+
+        this.initialized = true;
       }
-    });
-  }, { threshold: 0.3 });
-  document.querySelectorAll('.stat-fill').forEach(b => ioBars.observe(b));
-}
 
-/* ------------------------------------------------------------
-   5. NAVIGATION RAIL ACTIVE STATE
------------------------------------------------------------- */
-const navLinks = document.querySelectorAll('.railnav a');
-const navSections = [...navLinks].map(a => document.querySelector(a.getAttribute('href')));
-window.addEventListener('scroll', () => {
-  let currentIdx = 0;
-  const scrollMid = window.scrollY + window.innerHeight * 0.45;
-  navSections.forEach((sec, idx) => {
-    if (sec && sec.offsetTop <= scrollMid) {
-      currentIdx = idx;
-    }
-  });
-  navLinks.forEach((link, idx) => {
-    link.classList.toggle('active', idx === currentIdx);
-  });
-}, { passive: true });
+      update(rpmRatio, isDrifting, isNitro) {
+        if (!this.initialized || !this.enabled || this.ctx.state !== 'running') return;
+        const now = this.ctx.currentTime;
 
-/* ------------------------------------------------------------
-   6. 3D PERSPECTIVE TILT (DESKTOP ONLY)
------------------------------------------------------------- */
-if (window.matchMedia('(pointer: fine)').matches) {
-  const tiltCards = document.querySelectorAll('.glass, .talisman-frame');
-  tiltCards.forEach(card => {
-    card.addEventListener('mousemove', (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const cx = rect.width / 2;
-      const cy = rect.height / 2;
-      const rotX = ((y - cy) / cy) * -5.5;
-      const rotY = ((x - cx) / cx) * 5.5;
-      card.style.transform = `perspective(900px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-3px)`;
-    });
-    card.addEventListener('mouseleave', () => {
-      card.style.transform = `perspective(900px) rotateX(0deg) rotateY(0deg) translateY(0px)`;
-    });
-  });
-}
+        // Scale engine pitch & filter cutoff
+        const pitch = 38 + rpmRatio * 160;
+        this.oscSaw.frequency.setTargetAtTime(pitch, now, 0.05);
+        this.oscSub.frequency.setTargetAtTime(pitch * 0.5, now, 0.05);
+        this.filter.frequency.setTargetAtTime(120 + rpmRatio * 1800, now, 0.05);
 
-/* ------------------------------------------------------------
-   7. INTERACTIVE RPG STAT REROLL
------------------------------------------------------------- */
-const personalities = [
-  { name: "Random.exe", pct: 75, note: "No fixed build — mood, humor, and energy re-roll daily. Consistency was never the point." },
-  { name: "2AM Theorist", pct: 92, note: "Deep dive mode enabled. Decoding light novel foreshadowing while the world sleeps." },
-  { name: "Re:Zero Apologist", pct: 99, note: "Arc 6 enthusiast. Believes Subaru's suffering holds the key to emotional enlightenment." },
-  { name: "Silent Guild Member", pct: 40, note: "Always online, rarely in VC. Top-tier lurker with lethal one-liners in chat." },
-  { name: "Jack of All Arts", pct: 86, note: "Writing scripts, configuring emulators, editing manga clips — master of nothing, learner of all." }
-];
+        // Tire drift screech volume
+        const squealTarget = isDrifting ? 0.08 : 0.0;
+        this.squealGain.gain.setTargetAtTime(squealTarget, now, 0.04);
+        if (isDrifting) {
+          this.squealFilter.frequency.setTargetAtTime(900 + Math.random() * 300, now, 0.02);
+        }
 
-let rollIndex = 0;
-document.getElementById('rerollPersonality').addEventListener('click', () => {
-  rollIndex = (rollIndex + 1) % personalities.length;
-  const current = personalities[rollIndex];
-  const valEl = document.getElementById('personalityVal');
-  const fillEl = document.getElementById('personalityFill');
-  const noteEl = document.getElementById('personalityNote');
+        // Nitro sound
+        const nitroTarget = isNitro ? 0.07 : 0.0;
+        this.nitroGain.gain.setTargetAtTime(nitroTarget, now, 0.06);
+        if (isNitro) {
+          this.nitroOsc.frequency.setTargetAtTime(320 + Math.random() * 40, now, 0.05);
+        }
+      }
 
-  valEl.style.opacity = '0';
-  noteEl.style.opacity = '0';
-  setTimeout(() => {
-    valEl.textContent = current.name;
-    noteEl.textContent = current.note;
-    fillEl.style.width = current.pct + '%';
-    valEl.style.opacity = '1';
-    noteEl.style.opacity = '1';
-  }, 250);
-
-  if (actx) {
-    const now = actx.currentTime;
-    pluck(523.25, now, 0.4, 0.08);
-    pluck(659.25, now + 0.1, 0.6, 0.07);
-    pluck(783.99, now + 0.2, 0.8, 0.09);
-  }
-  showToast('Rerolled: ' + current.name);
-});
-
-/* ------------------------------------------------------------
-   8. CODE-FORMAT INSTAGRAM QR CODE RENDERER
------------------------------------------------------------- */
-const qrMatrixData = [
-  "11111110000000011011101111111",
-  "10000010010010000110001000001",
-  "10111010100110101001101011101",
-  "10111010100010000101001011101",
-  "10111010100001110111001011101",
-  "10000010111101110100101000001",
-  "11111110101010101010101111111",
-  "00000000100101001000100000000",
-  "10111110011000100101001111100",
-  "10001100101110001111111110001",
-  "01100010001010011000111000000",
-  "11100000100000110000000101010",
-  "01010111000000000110000001100",
-  "00110101011001101111111010001",
-  "11011010010101110100001101100",
-  "00000100010101010001011110010",
-  "00110011101110100100100101100",
-  "11101101001000001101101110101",
-  "10101110010010010010110100100",
-  "10011001011110111001101110010",
-  "11111110100110011100111110111",
-  "00000000111101101010100011111",
-  "11111110001001110011101011100",
-  "10000010101011001001100010001",
-  "10111010100100100110111110110",
-  "10111010111100000111000101111",
-  "10111010100101011100001111110",
-  "10000010010011001010100101010",
-  "11111110110100101001010111100"
-];
-
-function renderInstaQR() {
-  const canvas = document.getElementById('instaQrCanvas');
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-  const displaySize = 210;
-  canvas.width = displaySize * dpr;
-  canvas.height = displaySize * dpr;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-  ctx.clearRect(0, 0, displaySize, displaySize);
-
-  const N = 29;
-  const margin = 12;
-  const area = displaySize - (margin * 2);
-  const cell = area / N;
-
-  const grad = ctx.createLinearGradient(0, 0, displaySize, displaySize);
-  grad.addColorStop(0, '#1d4ed8');
-  grad.addColorStop(0.5, '#4338ca');
-  grad.addColorStop(1, '#7c3aed');
-
-  const finderColor = '#1e40af';
-
-  function inFinder(r, c) {
-    if (r < 7 && c < 7) return true;
-    if (r < 7 && c >= N - 7) return true;
-    if (r >= N - 7 && c < 7) return true;
-    return false;
-  }
-
-  function inCenterLogo(r, c) {
-    return (r >= 11 && r <= 17 && c >= 11 && c <= 17);
-  }
-
-  ctx.fillStyle = grad;
-  const dotRadius = cell * 0.44;
-
-  for (let r = 0; r < N; r++) {
-    for (let c = 0; c < N; c++) {
-      if (inFinder(r, c)) continue;
-      if (inCenterLogo(r, c)) continue;
-
-      if (qrMatrixData[r][c] === '1') {
-        const cx = margin + (c + 0.5) * cell;
-        const cy = margin + (r + 0.5) * cell;
-        ctx.beginPath();
-        ctx.arc(cx, cy, dotRadius, 0, Math.PI * 2);
-        ctx.fill();
+      toggle() {
+        this.enabled = !this.enabled;
+        if (!this.enabled && this.engineGain) {
+          this.engineGain.gain.setValueAtTime(0, this.ctx.currentTime);
+          this.squealGain.gain.setValueAtTime(0, this.ctx.currentTime);
+          this.nitroGain.gain.setValueAtTime(0, this.ctx.currentTime);
+        } else if (this.enabled && this.engineGain) {
+          this.engineGain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+        }
+        return this.enabled;
       }
     }
-  }
 
-  function drawInstaFinder(topR, leftC) {
-    const x = margin + leftC * cell;
-    const y = margin + topR * cell;
-    const w = 7 * cell;
-    const radius = 8;
+    const audio = new ProceduralAudio();
 
-    ctx.save();
-    ctx.strokeStyle = finderColor;
-    ctx.lineWidth = cell * 0.95;
-    ctx.lineJoin = 'round';
+    /* ======================================================================
+       2. THREE.JS SCENE & RENDERER
+       ====================================================================== */
+    const canvas = document.getElementById('game-canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    const halfThick = ctx.lineWidth / 2;
-    const fx = x + halfThick;
-    const fy = y + halfThick;
-    const fw = w - ctx.lineWidth;
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a1128);
+    scene.fog = new THREE.FogExp2(0x0a1128, 0.012);
 
-    ctx.beginPath();
-    ctx.roundRect(fx, fy, fw, fw, radius);
-    ctx.stroke();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 800);
 
-    ctx.fillStyle = finderColor;
-    const innerX = x + 2.1 * cell;
-    const innerY = y + 2.1 * cell;
-    const innerW = 2.8 * cell;
-    ctx.beginPath();
-    ctx.roundRect(innerX, innerY, innerW, innerW, 5);
-    ctx.fill();
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
 
-    ctx.restore();
-  }
+    const sunLight = new THREE.DirectionalLight(0xfff7e6, 1.8);
+    sunLight.position.set(50, 90, 40);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 1024;
+    sunLight.shadow.mapSize.height = 1024;
+    sunLight.shadow.camera.near = 10;
+    sunLight.shadow.camera.far = 250;
+    sunLight.shadow.camera.left = -50;
+    sunLight.shadow.camera.right = 50;
+    sunLight.shadow.camera.top = 50;
+    sunLight.shadow.camera.bottom = -50;
+    scene.add(sunLight);
 
-  drawInstaFinder(0, 0);
-  drawInstaFinder(0, N - 7);
-  drawInstaFinder(N - 7, 0);
+    /* ======================================================================
+       3. PROCEDURAL ROAD & INFINITE TERRAIN STREAMING
+       ====================================================================== */
+    const ROAD_WIDTH = 12;
+    const CHUNK_LENGTH = 160;
+    const NUM_CHUNKS = 8;
+    const CHUNK_SEGMENTS = 40;
 
-  const centerSize = 7.0 * cell;
-  const centerX = margin + 14.5 * cell - (centerSize / 2);
-  const centerY = margin + 14.5 * cell - (centerSize / 2);
-
-  ctx.save();
-  ctx.fillStyle = '#ffffff';
-  ctx.shadowColor = 'rgba(0,0,0,0.15)';
-  ctx.shadowBlur = 6;
-  ctx.beginPath();
-  ctx.roundRect(centerX - 2, centerY - 2, centerSize + 4, centerSize + 4, 8);
-  ctx.fill();
-  ctx.restore();
-
-  ctx.save();
-  ctx.strokeStyle = '#2563eb';
-  ctx.lineWidth = 2.4;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-
-  const camMargin = 4;
-  const cx = centerX + camMargin;
-  const cy = centerY + camMargin;
-  const cw = centerSize - (camMargin * 2);
-
-  ctx.beginPath();
-  ctx.roundRect(cx, cy, cw, cw, 7);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.arc(cx + cw / 2, cy + cw / 2, cw * 0.28, 0, Math.PI * 2);
-  ctx.stroke();
-
-  ctx.fillStyle = '#2563eb';
-  ctx.beginPath();
-  ctx.arc(cx + cw * 0.76, cy + cw * 0.24, cw * 0.08, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.restore();
-}
-
-renderInstaQR();
-
-/* ------------------------------------------------------------
-   9. CELESTIAL DRAGON MOUSE & TOUCH TRACKER (PHONE & PC READY)
------------------------------------------------------------- */
-const dragonCanvas = document.getElementById('dragonCanvas');
-const dctx = dragonCanvas.getContext('2d');
-let dW, dH, dDPR;
-
-function resizeDragon() {
-  dDPR = Math.min(window.devicePixelRatio || 1, 2);
-  dW = window.innerWidth;
-  dH = window.innerHeight;
-  dragonCanvas.width = dW * dDPR;
-  dragonCanvas.height = dH * dDPR;
-  dctx.setTransform(dDPR, 0, 0, dDPR, 0, 0);
-}
-window.addEventListener('resize', resizeDragon);
-resizeDragon();
-
-// Pointer State (Phone Touch + PC Mouse)
-const pointer = {
-  x: window.innerWidth * 0.5,
-  y: window.innerHeight * 0.45,
-  targetX: window.innerWidth * 0.5,
-  targetY: window.innerHeight * 0.45,
-  hasInteracted: false,
-  lastInteractionTime: performance.now(),
-  sparks: []
-};
-
-function setPointerTarget(px, py) {
-  pointer.targetX = px;
-  pointer.targetY = py;
-  pointer.hasInteracted = true;
-  pointer.lastInteractionTime = performance.now();
-}
-
-// PC Pointer Listeners
-window.addEventListener('pointermove', (e) => {
-  setPointerTarget(e.clientX, e.clientY);
-}, { passive: true });
-
-// Mobile Touch Listeners
-window.addEventListener('touchstart', (e) => {
-  if (e.touches && e.touches.length > 0) {
-    setPointerTarget(e.touches[0].clientX, e.touches[0].clientY);
-    spawnPearlSparks(e.touches[0].clientX, e.touches[0].clientY);
-  }
-}, { passive: true });
-
-window.addEventListener('touchmove', (e) => {
-  if (e.touches && e.touches.length > 0) {
-    setPointerTarget(e.touches[0].clientX, e.touches[0].clientY);
-  }
-}, { passive: true });
-
-window.addEventListener('click', (e) => {
-  spawnPearlSparks(e.clientX, e.clientY);
-});
-
-function spawnPearlSparks(x, y) {
-  for (let i = 0; i < 14; i++) {
-    const ang = Math.random() * Math.PI * 2;
-    const spd = Math.random() * 4 + 2;
-    pointer.sparks.push({
-      x: x, y: y,
-      vx: Math.cos(ang) * spd,
-      vy: Math.sin(ang) * spd,
-      life: 1.0,
-      decay: Math.random() * 0.035 + 0.025,
-      size: Math.random() * 2.5 + 1.2
-    });
-  }
-}
-
-// Dragon Skeletal Model (45 Segments with Inverse Kinematics)
-const SEG_COUNT = 45;
-const dragonSegments = [];
-for (let i = 0; i < SEG_COUNT; i++) {
-  const p = i / (SEG_COUNT - 1);
-  let w;
-  if (p < 0.12) {
-    w = 13 + (p / 0.12) * 8;
-  } else if (p < 0.55) {
-    w = 21 - ((p - 0.12) / 0.43) * 6;
-  } else {
-    w = 15 * (1 - (p - 0.55) / 0.45);
-  }
-  dragonSegments.push({
-    x: dW * 0.5 - i * 12,
-    y: dH * 0.45,
-    w: Math.max(2.5, w),
-    angle: 0,
-    spacing: 12
-  });
-}
-
-const legPairs = [
-  { segIdx: 8, upperLen: 22, lowerLen: 20, phase: 0 },
-  { segIdx: 22, upperLen: 20, lowerLen: 18, phase: Math.PI }
-];
-
-let distanceTravelled = 0;
-
-function drawDragonTracker(now) {
-  dctx.clearRect(0, 0, dW, dH);
-
-  const timeSinceInteraction = now - pointer.lastInteractionTime;
-  const isIdle = !pointer.hasInteracted || timeSinceInteraction > 3500;
-
-  if (isIdle) {
-    const cx = dW * 0.5;
-    const cy = dH * 0.45;
-    const rx = Math.min(dW * 0.38, 520);
-    const ry = Math.min(dH * 0.32, 380);
-    const t = now * 0.0006;
-    pointer.targetX = cx + Math.sin(t) * rx;
-    pointer.targetY = cy + Math.sin(t * 2) * (ry * 0.6);
-  }
-
-  pointer.x += (pointer.targetX - pointer.x) * 0.09;
-  pointer.y += (pointer.targetY - pointer.y) * 0.09;
-
-  // Move Dragon Head
-  const head = dragonSegments[0];
-  const hdx = pointer.x - head.x;
-  const hdy = pointer.y - head.y;
-  const hdist = Math.hypot(hdx, hdy);
-  const targetAngle = Math.atan2(hdy, hdx);
-
-  let angleDiff = targetAngle - head.angle;
-  while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-  while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
-  head.angle += angleDiff * 0.14;
-
-  const moveSpeed = Math.min(hdist * 0.08, 14);
-  const vx = Math.cos(head.angle) * moveSpeed;
-  const vy = Math.sin(head.angle) * moveSpeed;
-  head.x += vx;
-  head.y += vy;
-  distanceTravelled += moveSpeed;
-
-  // Trailing Spine Segments
-  for (let i = 1; i < SEG_COUNT; i++) {
-    const prev = dragonSegments[i - 1];
-    const curr = dragonSegments[i];
-    const sDx = prev.x - curr.x;
-    const sDy = prev.y - curr.y;
-    const sDist = Math.hypot(sDx, sDy);
-
-    const wave = Math.sin(now * 0.0055 - i * 0.24) * (1 - i / SEG_COUNT) * 2.8;
-    const normalX = -Math.sin(curr.angle) * wave;
-    const normalY = Math.cos(curr.angle) * wave;
-
-    if (sDist > 0) {
-      curr.x = prev.x - (sDx / sDist) * curr.spacing + normalX * 0.3;
-      curr.y = prev.y - (sDy / sDist) * curr.spacing + normalY * 0.3;
-      curr.angle = Math.atan2(sDy, sDx);
+    function getRoadOffset(z) {
+      const x = Math.sin(z * 0.012) * 18 + Math.cos(z * 0.005) * 35;
+      const y = Math.sin(z * 0.008) * 6;
+      return { x, y };
     }
-  }
 
-  // Render Limbs & Claws
-  legPairs.forEach(pair => {
-    const rootSeg = dragonSegments[pair.segIdx];
-   .forEach(side => {
-      const walkCycle = Math.sin(distanceTravelled * 0.045 + pair.phase + (side > 0 ? 0 : Math.PI));
-      const rootAngle = rootSeg.angle + (side * Math.PI * 0.45);
-      const kneeAngle = rootAngle + (walkCycle * 0.4) + (side * 0.3);
+    class RoadChunk {
+      constructor(index) {
+        this.index = index;
+        this.group = new THREE.Group();
 
-      const kneeX = rootSeg.x + Math.cos(kneeAngle) * pair.upperLen;
-      const kneeY = rootSeg.y + Math.sin(kneeAngle) * pair.upperLen;
-      const footAngle = kneeAngle + (side * 0.6) - (walkCycle * 0.3);
-      const footX = kneeX + Math.cos(footAngle) * pair.lowerLen;
-      const footY = kneeY + Math.sin(footAngle) * pair.lowerLen;
+        // Road Surface Ribbon Mesh
+        this.roadGeo = new THREE.PlaneGeometry(ROAD_WIDTH, CHUNK_LENGTH, 1, CHUNK_SEGMENTS);
+        this.roadGeo.rotateX(-Math.PI / 2);
+        this.roadMat = new THREE.MeshStandardMaterial({
+          color: 0x18181c,
+          roughness: 0.85,
+          metalness: 0.15
+        });
+        this.roadMesh = new THREE.Mesh(this.roadGeo, this.roadMat);
+        this.roadMesh.receiveShadow = true;
+        this.group.add(this.roadMesh);
 
-      dctx.save();
-      dctx.strokeStyle = 'rgba(201,162,76,0.55)';
-      dctx.lineWidth = 2.2;
-      dctx.lineCap = 'round';
-      dctx.beginPath();
-      dctx.moveTo(rootSeg.x, rootSeg.y);
-      dctx.lineTo(kneeX, kneeY);
-      dctx.lineTo(footX, footY);
-      dctx.stroke();
+        // Lane Marking Ribbon
+        const stripeGeo = new THREE.PlaneGeometry(0.35, CHUNK_LENGTH, 1, CHUNK_SEGMENTS);
+        stripeGeo.rotateX(-Math.PI / 2);
+        const stripeMat = new THREE.MeshBasicMaterial({ color: 0xffdd44 });
+        this.stripeMesh = new THREE.Mesh(stripeGeo, stripeMat);
+        this.stripeMesh.position.y = 0.02;
+        this.group.add(this.stripeMesh);
 
-      for (let c = -1; c <= 1; c++) {
-        const clawAngle = footAngle + (c * 0.35);
-        dctx.beginPath();
-        dctx.moveTo(footX, footY);
-        dctx.lineTo(footX + Math.cos(clawAngle) * 6, footY + Math.sin(clawAngle) * 6);
-        dctx.strokeStyle = '#eccf82';
-        dctx.lineWidth = 1.6;
-        dctx.stroke();
+        // Terrain Side Skirts
+        const groundGeo = new THREE.PlaneGeometry(160, CHUNK_LENGTH, 16, CHUNK_SEGMENTS);
+        groundGeo.rotateX(-Math.PI / 2);
+        const groundMat = new THREE.MeshStandardMaterial({
+          color: 0x0f2b1d,
+          roughness: 0.95
+        });
+        this.groundMesh = new THREE.Mesh(groundGeo, groundMat);
+        this.groundMesh.position.y = -0.05;
+        this.groundMesh.receiveShadow = true;
+        this.group.add(this.groundMesh);
+
+        // Roadside Props
+        this.propsGroup = new THREE.Group();
+        this.group.add(this.propsGroup);
+
+        scene.add(this.group);
       }
-      dctx.restore();
+
+      build(baseZ) {
+        this.baseZ = baseZ;
+        this.group.position.set(0, 0, baseZ);
+
+        const rPos = this.roadGeo.attributes.position;
+        const sPos = this.stripeMesh.geometry.attributes.position;
+        const gPos = this.groundMesh.geometry.attributes.position;
+
+        for (let i = 0; i < rPos.count; i++) {
+          const vz = rPos.getZ(i) + baseZ;
+          const curve = getRoadOffset(vz);
+          rPos.setX(i, rPos.getX(i) + curve.x);
+          rPos.setY(i, curve.y);
+
+          sPos.setX(i, sPos.getX(i) + curve.x);
+          sPos.setY(i, curve.y + 0.02);
+        }
+        rPos.needsUpdate = true;
+        sPos.needsUpdate = true;
+        this.roadGeo.computeVertexNormals();
+
+        for (let i = 0; i < gPos.count; i++) {
+          const vz = gPos.getZ(i) + baseZ;
+          const curve = getRoadOffset(vz);
+          const rawX = gPos.getX(i);
+          const distFromRoad = Math.abs(rawX - curve.x);
+
+          const hill = Math.sin(rawX * 0.05 + vz * 0.02) * 5;
+          const blend = Math.min(1, Math.max(0, (distFromRoad - ROAD_WIDTH * 0.5) / 15));
+          gPos.setY(i, curve.y - 0.1 + hill * blend);
+        }
+        gPos.needsUpdate = true;
+        this.groundMesh.geometry.computeVertexNormals();
+
+        while (this.propsGroup.children.length > 0) {
+          const obj = this.propsGroup.children[0];
+          this.propsGroup.remove(obj);
+        }
+
+        const treeCount = 8;
+        for (let t = 0; t < treeCount; t++) {
+          const zRel = (Math.random() - 0.5) * CHUNK_LENGTH;
+          const worldZ = baseZ + zRel;
+          const curve = getRoadOffset(worldZ);
+
+          const side = Math.random() > 0.5 ? 1 : -1;
+          const xOffset = curve.x + side * (ROAD_WIDTH * 0.5 + 4 + Math.random() * 25);
+          const tree = createProceduralTree();
+          tree.position.set(xOffset, curve.y, zRel);
+          this.propsGroup.add(tree);
+        }
+      }
+    }
+
+    function createProceduralTree() {
+      const g = new THREE.Group();
+      const trunk = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.25, 0.4, 2.5, 5),
+        new THREE.MeshStandardMaterial({ color: 0x3d2817, roughness: 0.9 })
+      );
+      trunk.position.y = 1.25;
+      trunk.castShadow = true;
+      g.add(trunk);
+
+      const foliage = new THREE.Mesh(
+        new THREE.ConeGeometry(2.0, 4.5, 5),
+        new THREE.MeshStandardMaterial({ color: 0x144026, roughness: 0.8, flatShading: true })
+      );
+      foliage.position.y = 4.2;
+      foliage.castShadow = true;
+      g.add(foliage);
+      return g;
+    }
+
+    const chunks = [];
+    for (let i = 0; i < NUM_CHUNKS; i++) {
+      const chunk = new RoadChunk(i);
+      chunk.build(i * CHUNK_LENGTH);
+      chunks.push(chunk);
+    }
+
+    /* ======================================================================
+       4. PROCEDURAL VEHICLE
+       ====================================================================== */
+    const carColors = [0xef4444, 0x3b82f6, 0x10b981, 0xf59e0b, 0x8b5cf6, 0xec4899, 0xf8fafc];
+    let currentColorIndex = 0;
+
+    const car = new THREE.Group();
+
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: carColors[currentColorIndex],
+      metalness: 0.65,
+      roughness: 0.25
     });
-  });
+    const bodyGeo = new THREE.BoxGeometry(2.1, 0.65, 4.4);
+    const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+    bodyMesh.position.y = 0.6;
+    bodyMesh.castShadow = true;
+    car.add(bodyMesh);
 
-  // Spine Glow Line
-  dctx.save();
-  dctx.beginPath();
-  dragonSegments.forEach((seg, i) => {
-    if (i === 0) dctx.moveTo(seg.x, seg.y);
-    else dctx.lineTo(seg.x, seg.y);
-  });
-  const spineGrad = dctx.createLinearGradient(0, 0, 0, dH);
-  spineGrad.addColorStop(0, 'rgba(201,162,76,0.7)');
-  spineGrad.addColorStop(0.5, 'rgba(111,160,141,0.65)');
-  spineGrad.addColorStop(1, 'rgba(163,49,31,0.7)');
-  dctx.strokeStyle = spineGrad;
-  dctx.lineWidth = 3;
-  dctx.lineJoin = 'round';
-  dctx.lineCap = 'round';
-  dctx.shadowColor = 'rgba(201,162,76,0.65)';
-  dctx.shadowBlur = 18;
-  dctx.stroke();
-  dctx.restore();
+    const cabinMat = new THREE.MeshStandardMaterial({
+      color: 0x05070a,
+      metalness: 0.95,
+      roughness: 0.05
+    });
+    const cabinGeo = new THREE.BoxGeometry(1.6, 0.55, 2.2);
+    const cabinMesh = new THREE.Mesh(cabinGeo, cabinMat);
+    cabinMesh.position.set(0, 1.1, -0.3);
+    cabinMesh.castShadow = true;
+    car.add(cabinMesh);
 
-  // Glass Body Segments & Dorsal Spikes
-  for (let i = SEG_COUNT - 1; i >= 1; i--) {
-    const seg = dragonSegments[i];
-    const prev = dragonSegments[i - 1];
-    const angle = Math.atan2(prev.y - seg.y, prev.x - seg.x);
-    const p = i / (SEG_COUNT - 1);
-    const alpha = (1 - p * 0.45);
+    const spoilerBar = new THREE.Mesh(
+      new THREE.BoxGeometry(2.2, 0.1, 0.4),
+      new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.4 })
+    );
+    spoilerBar.position.set(0, 1.25, -2.0);
+    car.add(spoilerBar);
 
-    dctx.save();
-    dctx.translate(seg.x, seg.y);
-    dctx.rotate(angle);
+    const headLightMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(0.35, 0.15, 0.1),
+      new THREE.MeshBasicMaterial({ color: 0xffffff })
+    );
+    headLightMesh.position.set(0.7, 0.6, 2.22);
+    car.add(headLightMesh);
+    const headLightMeshL = headLightMesh.clone();
+    headLightMeshL.position.x = -0.7;
+    car.add(headLightMeshL);
 
-    if (i % 2 === 0 && i < SEG_COUNT - 6) {
-      const finLen = seg.w * 0.95;
-      dctx.beginPath();
-      dctx.moveTo(0, 0);
-      dctx.lineTo(-seg.w * 0.8, -finLen);
-      dctx.lineTo(-seg.w * 0.4, 0);
-      dctx.fillStyle = `rgba(201,162,76,${0.45 * alpha})`;
-      dctx.fill();
+    const tailLightMat = new THREE.MeshBasicMaterial({ color: 0xff1122 });
+    const tailLightR = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.15, 0.1), tailLightMat);
+    tailLightR.position.set(0.7, 0.65, -2.22);
+    car.add(tailLightR);
+    const tailLightL = tailLightR.clone();
+    tailLightL.position.x = -0.7;
+    car.add(tailLightL);
+
+    const underglowLight = new THREE.PointLight(0x00f0ff, 2.5, 8);
+    underglowLight.position.set(0, 0.2, 0);
+    car.add(underglowLight);
+
+    const wheelMeshes = [];
+    const wheelGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.35, 18);
+    wheelGeo.rotateZ(Math.PI / 2);
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x1c1c20, roughness: 0.9 });
+    const rimMat = new THREE.MeshStandardMaterial({ color: 0xd4d4d8, metalness: 0.8, roughness: 0.2 });
+
+    const wheelOffsets = [
+      { x: -1.15, y: 0.42, z: 1.35, front: true },
+      { x: 1.15, y: 0.42, z: 1.35, front: true },
+      { x: -1.15, y: 0.42, z: -1.35, front: false },
+      { x: 1.15, y: 0.42, z: -1.35, front: false }
+    ];
+
+    wheelOffsets.forEach((pos) => {
+      const wheelHolder = new THREE.Group();
+      wheelHolder.position.set(pos.x, pos.y, pos.z);
+
+      const wMesh = new THREE.Mesh(wheelGeo, wheelMat);
+      wMesh.castShadow = true;
+      wheelHolder.add(wMesh);
+
+      const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.36, 6), rimMat);
+      rim.rotateZ(Math.PI / 2);
+      wheelHolder.add(rim);
+
+      car.add(wheelHolder);
+      wheelMeshes.push({ holder: wheelHolder, mesh: wMesh, front: pos.front });
+    });
+
+    // Particle Drift Smoke
+    const SMOKE_COUNT = 60;
+    const smokeGeo = new THREE.BufferGeometry();
+    const smokePos = new Float32Array(SMOKE_COUNT * 3);
+    for (let i = 0; i < SMOKE_COUNT * 3; i++) smokePos[i] = 0;
+    smokeGeo.setAttribute('position', new THREE.BufferAttribute(smokePos, 3));
+    const smokeMat = new THREE.PointsMaterial({
+      color: 0xcccccc,
+      size: 0.8,
+      transparent: true,
+      opacity: 0.4
+    });
+    const smokeParticles = new THREE.Points(smokeGeo, smokeMat);
+    scene.add(smokeParticles);
+    let smokeIdx = 0;
+
+    scene.add(car);
+
+    /* ======================================================================
+       5. INPUT HANDLING (PC + TOUCH JOYSTICK + GAMEPAD)
+       ====================================================================== */
+    const input = {
+      throttle: 0,
+      steering: 0,
+      drift: false,
+      nitro: false
+    };
+
+    const keys = {};
+    window.addEventListener('keydown', (e) => {
+      keys[e.key.toLowerCase()] = true;
+      audio.init();
+    });
+    window.addEventListener('keyup', (e) => {
+      keys[e.key.toLowerCase()] = false;
+    });
+
+    const isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+    const touchOverlay = document.getElementById('touch-controls');
+    if (isTouchDevice) {
+      touchOverlay.style.display = 'flex';
     }
 
-    const segGrad = dctx.createLinearGradient(-seg.w, 0, seg.w, 0);
-    segGrad.addColorStop(0, 'rgba(236,226,198,0.02)');
-    segGrad.addColorStop(0.5, `rgba(236,226,198,${0.18 * alpha})`);
-    segGrad.addColorStop(1, 'rgba(236,226,198,0.02)');
-    dctx.fillStyle = segGrad;
-    dctx.beginPath();
-    dctx.ellipse(0, 0, seg.w * 1.3, seg.w * 0.65, 0, 0, Math.PI * 2);
-    dctx.fill();
+    const joystickZone = document.getElementById('joystick-zone');
+    const joystickKnob = document.getElementById('joystick-knob');
+    let joyActive = false;
+    let joyCenter = { x: 0, y: 0 };
 
-    dctx.strokeStyle = `rgba(201,162,76,${0.35 * alpha})`;
-    dctx.lineWidth = 1;
-    dctx.stroke();
-    dctx.restore();
-  }
+    joystickZone.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      audio.init();
+      joyActive = true;
+      const rect = joystickZone.getBoundingClientRect();
+      joyCenter = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+      handleJoyMove(e.touches[0]);
+    });
 
-  // Tail Tuft
-  const tailTip = dragonSegments[SEG_COUNT - 1];
-  dctx.save();
-  dctx.translate(tailTip.x, tailTip.y);
-  dctx.rotate(tailTip.angle);
-  const tailWave = Math.sin(now * 0.008) * 6;
-  dctx.beginPath();
-  dctx.moveTo(0, 0);
-  dctx.quadraticCurveTo(-18, tailWave - 12, -34, tailWave);
-  dctx.quadraticCurveTo(-18, tailWave + 12, 0, 0);
-  dctx.fillStyle = 'rgba(236,207,130,0.55)';
-  dctx.shadowColor = 'rgba(201,162,76,0.8)';
-  dctx.shadowBlur = 14;
-  dctx.fill();
-  dctx.restore();
+    window.addEventListener('touchmove', (e) => {
+      if (!joyActive) return;
+      for (let t of e.touches) {
+        if (t.clientX < window.innerWidth * 0.5) {
+          handleJoyMove(t);
+          break;
+        }
+      }
+    });
 
-  // Head Silhouette & Whiskers
-  dctx.save();
-  dctx.translate(head.x, head.y);
-  dctx.rotate(head.angle);
+    window.addEventListener('touchend', (e) => {
+      if (joyActive && e.touches.length === 0) {
+        joyActive = false;
+        joystickKnob.style.transform = `translate(0px, 0px)`;
+        input.steering = 0;
+      }
+    });
 
-  dctx.strokeStyle = '#eccf82';
-  dctx.lineWidth = 2.4;
-  dctx.lineCap = 'round';
- .forEach(side => {
-    dctx.beginPath();
-    dctx.moveTo(-2, side * 5);
-    dctx.quadraticCurveTo(-18, side * 18, -32, side * 14);
-    dctx.stroke();
-    dctx.beginPath();
-    dctx.moveTo(-16, side * 14);
-    dctx.lineTo(-24, side * 22);
-    dctx.stroke();
-  });
-
-  dctx.fillStyle = 'rgba(24, 18, 14, 0.92)';
-  dctx.strokeStyle = 'rgba(201,162,76,0.85)';
-  dctx.lineWidth = 1.8;
-  dctx.beginPath();
-  dctx.moveTo(18, 0);
-  dctx.lineTo(8, -10);
-  dctx.lineTo(-12, -12);
-  dctx.lineTo(-10, 0);
-  dctx.lineTo(-12, 12);
-  dctx.lineTo(8, 10);
-  dctx.closePath();
-  dctx.fill();
-  dctx.stroke();
-
- .forEach(side => {
-    dctx.save();
-    dctx.fillStyle = '#eccf82';
-    dctx.shadowColor = '#eccf82';
-    dctx.shadowBlur = 10;
-    dctx.beginPath();
-    dctx.ellipse(3, side * 6, 4.5, 2.5, (side * 0.2), 0, Math.PI * 2);
-    dctx.fill();
-    dctx.fillStyle = '#0a0908';
-    dctx.beginPath();
-    dctx.ellipse(3.2, side * 6, 2, 1.2, 0, 0, Math.PI * 2);
-    dctx.fill();
-    dctx.restore();
-  });
-
-  .forEach(side => {
-    const whiskerWobble = Math.sin(now * 0.007 + side) * 8;
-    dctx.beginPath();
-    dctx.moveTo(12, side * 3);
-    dctx.bezierCurveTo(4, side * 16, -18, side * 22 + whiskerWobble, -38, side * 14 + whiskerWobble * 1.5);
-    dctx.strokeStyle = 'rgba(236,207,130,0.7)';
-    dctx.lineWidth = 1.2;
-    dctx.stroke();
-  });
-
-  dctx.restore();
-
-  // Celestial Dragon Pearl (Target Orb)
-  dctx.save();
-  const pearlGlow = dctx.createRadialGradient(pointer.x, pointer.y, 0, pointer.x, pointer.y, 24);
-  pearlGlow.addColorStop(0, 'rgba(236,207,130,0.95)');
-  pearlGlow.addColorStop(0.35, 'rgba(56,189,248,0.5)');
-  pearlGlow.addColorStop(1, 'rgba(56,189,248,0.0)');
-  dctx.fillStyle = pearlGlow;
-  dctx.beginPath();
-  dctx.arc(pointer.x, pointer.y, 24, 0, Math.PI * 2);
-  dctx.fill();
-
-  dctx.fillStyle = '#ffffff';
-  dctx.beginPath();
-  dctx.arc(pointer.x, pointer.y, 3.5, 0, Math.PI * 2);
-  dctx.fill();
-  dctx.restore();
-
-  // Click / Touch Sparks
-  for (let i = pointer.sparks.length - 1; i >= 0; i--) {
-    const sp = pointer.sparks[i];
-    sp.x += sp.vx;
-    sp.y += sp.vy;
-    sp.life -= sp.decay;
-    if (sp.life <= 0) {
-      pointer.sparks.splice(i, 1);
-      continue;
+    function handleJoyMove(touch) {
+      const dx = touch.clientX - joyCenter.x;
+      const dy = touch.clientY - joyCenter.y;
+      const dist = Math.min(48, Math.hypot(dx, dy));
+      const angle = Math.atan2(dy, dx);
+      const kx = Math.cos(angle) * dist;
+      const ky = Math.sin(angle) * dist;
+      joystickKnob.style.transform = `translate(${kx}px, ${ky}px)`;
+      input.steering = Math.max(-1, Math.min(1, kx / 40));
     }
-    dctx.save();
-    dctx.fillStyle = `rgba(236,207,130,${sp.life})`;
-    dctx.shadowColor = '#eccf82';
-    dctx.shadowBlur = 6;
-    dctx.beginPath();
-    dctx.arc(sp.x, sp.y, sp.size * sp.life, 0, Math.PI * 2);
-    dctx.fill();
-    dctx.restore();
-  }
 
-  requestAnimationFrame(drawDragonTracker);
-}
-requestAnimationFrame(drawDragonTracker);
-
-/* ------------------------------------------------------------
-   10. BACKGROUND CELESTIAL EMBER DUST
------------------------------------------------------------- */
-const pCanvas = document.getElementById('particleCanvas');
-const pctx = pCanvas.getContext('2d');
-let pW, pH;
-
-function resizeParticles() {
-  pW = pCanvas.width = window.innerWidth;
-  pH = pCanvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resizeParticles);
-resizeParticles();
-
-const particles = [];
-const particleCount = 36;
-for (let i = 0; i < particleCount; i++) {
-  particles.push({
-    x: Math.random() * pW,
-    y: Math.random() * pH,
-    r: Math.random() * 1.8 + 0.6,
-    vy: -(Math.random() * 0.35 + 0.15),
-    vx: (Math.random() - 0.5) * 0.25,
-    alpha: Math.random() * 0.5 + 0.2,
-    phase: Math.random() * Math.PI * 2
-  });
-}
-
-function drawParticles() {
-  pctx.clearRect(0, 0, pW, pH);
-  particles.forEach(p => {
-    p.y += p.vy;
-    p.x += p.vx + Math.sin(p.phase += 0.015) * 0.2;
-    if (p.y < -10) {
-      p.y = pH + 10;
-      p.x = Math.random() * pW;
+    function bindTouchBtn(btnId, property) {
+      const el = document.getElementById(btnId);
+      el.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        audio.init();
+        el.classList.add('active');
+        input[property] = true;
+        if (property === 'drift' && navigator.vibrate) navigator.vibrate(15);
+      });
+      el.addEventListener('touchend', (e) => {
+        el.classList.remove('active');
+        input[property] = false;
+      });
     }
-    if (p.x < -10) p.x = pW + 10;
-    if (p.x > pW + 10) p.x = -10;
+    bindTouchBtn('btn-touch-gas', 'gasTouch');
+    bindTouchBtn('btn-touch-brake', 'brakeTouch');
+    bindTouchBtn('btn-touch-drift', 'drift');
+    bindTouchBtn('btn-touch-nitro', 'nitro');
 
-    pctx.save();
-    pctx.beginPath();
-    pctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    pctx.fillStyle = `rgba(236,207,130,${p.alpha})`;
-    pctx.shadowColor = 'rgba(201,162,76,0.5)';
-    pctx.shadowBlur = 6;
-    pctx.fill();
-    pctx.restore();
-  });
-  requestAnimationFrame(drawParticles);
-}
-requestAnimationFrame(drawParticles);
+    document.getElementById('btn-cam').addEventListener('click', toggleCamera);
+    document.getElementById('btn-color').addEventListener('click', () => {
+      currentColorIndex = (currentColorIndex + 1) % carColors.length;
+      bodyMat.color.setHex(carColors[currentColorIndex]);
+    });
+    document.getElementById('btn-sound').addEventListener('click', (e) => {
+      audio.init();
+      const on = audio.toggle();
+      e.target.innerText = on ? '🔊 ON' : '🔇 OFF';
+    });
 
-/* ------------------------------------------------------------
-   11. AMBIENT QIN HARP — WEB AUDIO API SYNTHESIS
------------------------------------------------------------- */
-let actx = null, playing = false, padGain = null, scheduleId = null;
-const pentatonic = [196.00, 220.00, 261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25];
+    document.getElementById('start-screen').addEventListener('click', () => {
+      document.getElementById('start-screen').style.display = 'none';
+      audio.init();
+    });
 
-function ensureAudio() {
-  if (actx) return;
-  actx = new (window.AudioContext || window.webkitAudioContext)();
+    /* ======================================================================
+       6. SIMULATION & DRIFT ENGINE
+       ====================================================================== */
+    let speed = 0;
+    let nitroFuel = 100;
+    let driftScore = 0;
+    let totalScore = 0;
+    let driftMultiplier = 1.0;
+    let isDriftingNow = false;
 
-  padGain = actx.createGain();
-  padGain.gain.value = 0.0;
-  const filter = actx.createBiquadFilter();
-  filter.type = 'lowpass';
-  filter.frequency.value = 920;
-  padGain.connect(filter).connect(actx.destination);
+    const MAX_FORWARD_SPEED = 1.6;
+    const ACCEL = 0.022;
+    const BRAKE = 0.035;
+    const DRAG = 0.985;
+    const STEER_SENSITIVITY = 0.032;
 
-  [98, 146.83, 220].forEach((f, i) => {
-    const o = actx.createOscillator();
-    o.type = i === 0 ? 'sine' : 'triangle';
-    o.frequency.value = f;
-    const g = actx.createGain();
-    g.gain.value = 0.05 / (i + 1);
-    o.connect(g).connect(padGain);
-    o.start();
-  });
-}
+    let cameraMode = 0;
+    function toggleCamera() {
+      cameraMode = (cameraMode + 1) % 3;
+    }
 
-function pluck(freq, time, dur = 2.4, vol = 0.12) {
-  if (!actx) return;
-  const o = actx.createOscillator();
-  o.type = 'sine';
-  o.frequency.value = freq;
-  const g = actx.createGain();
-  g.gain.setValueAtTime(0, time);
-  g.gain.linearRampToValueAtTime(vol, time + 0.03);
-  g.gain.exponentialRampToValueAtTime(0.0008, time + dur);
-  const filt = actx.createBiquadFilter();
-  filt.type = 'lowpass';
-  filt.frequency.value = 2400;
-  o.connect(filt).connect(g).connect(actx.destination);
-  o.start(time);
-  o.stop(time + dur + 0.1);
-}
+    function pollInputs() {
+      let gas = (keys['w'] || keys['arrowup'] || input.gasTouch) ? 1 : 0;
+      let brake = (keys['s'] || keys['arrowdown'] || input.brakeTouch) ? 1 : 0;
+      let steer = 0;
+      if (keys['a'] || keys['arrowleft']) steer -= 1;
+      if (keys['d'] || keys['arrowright']) steer += 1;
+      if (joyActive) steer = input.steering;
 
-function schedulePlucks() {
-  if (!playing) return;
-  const now = actx.currentTime;
-  const note = pentatonic[Math.floor(Math.random() * pentatonic.length)];
-  pluck(note, now + 0.05, 2.2 + Math.random() * 1.5, 0.08 + Math.random() * 0.05);
-  if (Math.random() < 0.35) {
-    pluck(note * 2, now + 0.4, 1.8, 0.035);
-  }
-  const nextIn = 900 + Math.random() * 1600;
-  scheduleId = setTimeout(schedulePlucks, nextIn);
-}
+      const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+      if (gamepads && gamepads[0]) {
+        const gp = gamepads[0];
+        if (Math.abs(gp.axes[0]) > 0.15) steer = gp.axes[0];
+        if (gp.buttons[7] && gp.buttons[7].value > 0.1) gas = gp.buttons[7].value;
+        if (gp.buttons[6] && gp.buttons[6].value > 0.1) brake = gp.buttons[6].value;
+        if (gp.buttons[0] && gp.buttons[0].pressed) input.drift = true;
+        if (gp.buttons[2] && gp.buttons[2].pressed) input.nitro = true;
+      }
 
-const soundBtn = document.getElementById('soundToggle');
-const soundLabel = document.getElementById('soundLabel');
+      input.throttle = gas - brake;
+      if (!joyActive && steer !== 0) input.steering = steer;
+      else if (!joyActive) input.steering = 0;
 
-soundBtn.addEventListener('click', () => {
-  ensureAudio();
-  if (actx.state === 'suspended') actx.resume();
-  playing = !playing;
-  soundBtn.classList.toggle('playing', playing);
-  if (playing) {
-    padGain.gain.cancelScheduledValues(actx.currentTime);
-    padGain.gain.linearRampToValueAtTime(1, actx.currentTime + 2.0);
-    soundLabel.textContent = 'playing';
-    schedulePlucks();
-    showToast('Ambient Qin Playing');
-  } else {
-    padGain.gain.cancelScheduledValues(actx.currentTime);
-    padGain.gain.linearRampToValueAtTime(0, actx.currentTime + 1.2);
-    soundLabel.textContent = 'paused';
-    clearTimeout(scheduleId);
-    showToast('Ambient Qin Paused');
-  }
-});
-</script>
+      if (keys[' '] || input.drift) input.drift = true;
+      else input.drift = false;
+
+      if (keys['shift'] || input.nitro) input.nitro = true;
+      else input.nitro = false;
+    }
+
+    /* ======================================================================
+       7. ANIMATION & RENDER LOOP
+       ====================================================================== */
+    const hudSpeed = document.getElementById('hud-speed');
+    const hudNitroFill = document.getElementById('hud-nitro-fill');
+    const hudNitroVal = document.getElementById('hud-nitro-val');
+    const hudDriftBanner = document.getElementById('hud-drift-banner');
+    const hudDriftScore = document.getElementById('hud-drift-score');
+    const hudDriftCombo = document.getElementById('hud-drift-combo');
+    const hudTotalScore = document.getElementById('hud-total-score');
+
+    let lastTime = performance.now();
+
+    function animate(currentTime) {
+      requestAnimationFrame(animate);
+
+      const dt = Math.min((currentTime - lastTime) / 1000, 0.05);
+      lastTime = currentTime;
+
+      pollInputs();
+
+      let topSpeed = MAX_FORWARD_SPEED;
+      let isBoosting = false;
+      if (input.nitro && nitroFuel > 2 && input.throttle > 0) {
+        isBoosting = true;
+        topSpeed *= 1.45;
+        speed += ACCEL * 1.8;
+        nitroFuel = Math.max(0, nitroFuel - dt * 35);
+      } else {
+        nitroFuel = Math.min(100, nitroFuel + dt * 10);
+      }
+
+      if (input.throttle > 0) {
+        speed = Math.min(speed + ACCEL, topSpeed);
+      } else if (input.throttle < 0) {
+        speed = Math.max(speed - BRAKE, -MAX_FORWARD_SPEED * 0.4);
+      } else {
+        speed *= DRAG;
+      }
+
+      const roadSpine = getRoadOffset(car.position.z);
+      const lateralDist = Math.abs(car.position.x - roadSpine.x);
+      if (lateralDist > ROAD_WIDTH * 0.5) {
+        speed *= 0.94;
+      }
+
+      const speedFactor = Math.min(1.0, Math.abs(speed) / (MAX_FORWARD_SPEED * 0.4));
+      const driftMult = input.drift ? 1.9 : 1.0;
+      car.rotation.y += -input.steering * STEER_SENSITIVITY * speedFactor * driftMult;
+
+      wheelMeshes.forEach((w) => {
+        if (w.front) w.holder.rotation.y = -input.steering * 0.5;
+        w.mesh.rotation.x += speed * 0.6;
+      });
+
+      const forwardZ = Math.cos(car.rotation.y) * speed;
+      const forwardX = Math.sin(car.rotation.y) * speed;
+      car.position.z += forwardZ;
+      car.position.x -= forwardX;
+      car.position.y = roadSpine.y;
+
+      isDriftingNow = input.drift && Math.abs(speed) > 0.4 && Math.abs(input.steering) > 0.2;
+      if (isDriftingNow) {
+        driftMultiplier = Math.min(4.0, driftMultiplier + dt * 0.8);
+        const addedScore = Math.floor(Math.abs(speed) * 80 * driftMultiplier);
+        driftScore += addedScore;
+        totalScore += addedScore;
+
+        hudDriftBanner.classList.add('active');
+        hudDriftScore.innerText = `+${driftScore} DRIFT`;
+        hudDriftCombo.innerText = `${driftMultiplier.toFixed(1)}x COMBO`;
+
+        const posArr = smokeParticles.geometry.attributes.position.array;
+        const pIdx = (smokeIdx % SMOKE_COUNT) * 3;
+        posArr[pIdx] = car.position.x + (Math.random() - 0.5) * 1.5;
+        posArr[pIdx + 1] = car.position.y + 0.1;
+        posArr[pIdx + 2] = car.position.z - 1.8;
+        smokeParticles.geometry.attributes.position.needsUpdate = true;
+        smokeIdx++;
+      } else {
+        if (driftScore > 0) {
+          driftScore = 0;
+          driftMultiplier = 1.0;
+          hudDriftBanner.classList.remove('active');
+        }
+      }
+
+      chunks.forEach((chunk) => {
+        if (chunk.group.position.z < car.position.z - CHUNK_LENGTH) {
+          const maxZ = Math.max(...chunks.map((c) => c.group.position.z));
+          chunk.build(maxZ + CHUNK_LENGTH);
+        }
+      });
+
+      sunLight.position.z = car.position.z + 50;
+      sunLight.target.position.set(car.position.x, car.position.y, car.position.z);
+
+      const camLerp = 0.12;
+      let targetCam;
+      if (cameraMode === 0) {
+        const fovBoost = isBoosting ? 74 : 60;
+        camera.fov = THREE.MathUtils.lerp(camera.fov, fovBoost, 0.1);
+        camera.updateProjectionMatrix();
+
+        targetCam = new THREE.Vector3(
+          car.position.x + Math.sin(car.rotation.y) * 8.5,
+          car.position.y + 3.8,
+          car.position.z - Math.cos(car.rotation.y) * 8.5
+        );
+        camera.position.lerp(targetCam, camLerp);
+        camera.lookAt(car.position.x, car.position.y + 1.2, car.position.z + 4);
+      } else if (cameraMode === 1) {
+        targetCam = new THREE.Vector3(
+          car.position.x - Math.sin(car.rotation.y) * 0.5,
+          car.position.y + 1.4,
+          car.position.z + Math.cos(car.rotation.y) * 0.5
+        );
+        camera.position.copy(targetCam);
+        camera.lookAt(
+          car.position.x - Math.sin(car.rotation.y) * 30,
+          car.position.y + 1.0,
+          car.position.z + Math.cos(car.rotation.y) * 30
+        );
+      } else {
+        targetCam = new THREE.Vector3(
+          car.position.x + Math.sin(car.rotation.y) * 5.5,
+          car.position.y + 2.2,
+          car.position.z - Math.cos(car.rotation.y) * 5.5
+        );
+        camera.position.lerp(targetCam, camLerp);
+        camera.lookAt(car.position.x, car.position.y + 0.8, car.position.z + 5);
+      }
+
+      const rpm = Math.min(1.0, Math.abs(speed) / MAX_FORWARD_SPEED);
+      audio.update(rpm, isDriftingNow, isBoosting);
+
+      const kmh = Math.round(Math.abs(speed) * 140);
+      hudSpeed.innerText = kmh;
+      hudNitroFill.style.width = `${nitroFuel}%`;
+      hudNitroVal.innerText = `${Math.round(nitroFuel)}%`;
+      hudTotalScore.innerText = totalScore;
+
+      renderer.render(scene, camera);
+    }
+
+    requestAnimationFrame(animate);
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
 </body>
 </html>
-'''
-
-with open("/working_dir/c_ff318baef73e01b9/index.html", "w", encoding="utf-8") as f:
-    f.write(html)
-
-print("Generated bulletproof index.html successfully!")
-EOF
-python3 make_final_masterpiece.py
-}
