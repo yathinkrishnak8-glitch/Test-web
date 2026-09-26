@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Veloce 3D: CarX Street Edition</title>
+  <title>Veloce 3D: Synthwave Street Edition</title>
   <style>
     * {
       box-sizing: border-box;
@@ -17,7 +17,7 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: #030712;
+      background: #02040a;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
     }
     #game-canvas {
@@ -53,14 +53,14 @@
     }
 
     .cluster-card {
-      background: linear-gradient(135deg, rgba(15, 23, 42, 0.88) 0%, rgba(3, 7, 18, 0.94) 100%);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.88) 0%, rgba(3, 7, 18, 0.95) 100%);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(56, 189, 248, 0.3);
       border-radius: 14px;
       padding: 10px 18px;
       color: #fff;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7), 0 0 15px rgba(56, 189, 248, 0.15);
       min-width: 185px;
     }
 
@@ -91,8 +91,8 @@
       font-size: 15px;
       font-weight: 900;
       color: #38bdf8;
-      background: rgba(56, 189, 248, 0.15);
-      border: 1px solid rgba(56, 189, 248, 0.4);
+      background: rgba(56, 189, 248, 0.18);
+      border: 1px solid rgba(56, 189, 248, 0.5);
       padding: 2px 8px;
       border-radius: 6px;
       letter-spacing: 1px;
@@ -105,11 +105,12 @@
       background: rgba(255, 255, 255, 0.15);
       border-radius: 3px;
       overflow: hidden;
+      display: flex;
     }
     .rpm-bar-fill {
       width: 0%;
       height: 100%;
-      background: linear-gradient(90deg, #38bdf8 0%, #facc15 70%, #ef4444 100%);
+      background: linear-gradient(90deg, #38bdf8 0%, #facc15 65%, #ff0055 100%);
       box-shadow: 0 0 10px #38bdf8;
       transition: width 0.05s ease-out;
     }
@@ -136,28 +137,32 @@
     .nitro-bar-fill {
       width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, #7c3aed, #c084fc, #38bdf8);
+      background: linear-gradient(90deg, #7c3aed, #c084fc, #00f0ff);
       box-shadow: 0 0 8px #c084fc;
     }
 
-    /* Drift Combo Banner */
+    /* Dynamic Pulsing Drift Banner */
     .drift-banner {
       align-self: center;
       margin-top: 10px;
       text-align: center;
       opacity: 0;
       transform: scale(0.85);
-      transition: opacity 0.15s, transform 0.15s;
+      transform-origin: center center;
+      transition: opacity 0.15s, transform 0.09s cubic-bezier(0.18, 0.89, 0.32, 1.28);
     }
     .drift-banner.active {
       opacity: 1;
       transform: scale(1);
     }
+    .drift-banner.pulse {
+      transform: scale(1.32) !important;
+    }
     .drift-text {
-      font-size: 26px;
+      font-size: 28px;
       font-weight: 900;
-      color: #fb923c;
-      text-shadow: 0 0 16px rgba(251, 146, 60, 0.9);
+      color: #ff9100;
+      text-shadow: 0 0 20px rgba(255, 145, 0, 0.95);
       font-style: italic;
       letter-spacing: 1px;
     }
@@ -166,6 +171,7 @@
       color: #fef08a;
       font-weight: 800;
       letter-spacing: 0.5px;
+      text-shadow: 0 0 10px rgba(254, 240, 138, 0.7);
     }
 
     /* Top Controls */
@@ -177,8 +183,8 @@
       justify-content: flex-end;
     }
     .hud-btn {
-      background: rgba(15, 23, 42, 0.82);
-      border: 1px solid rgba(255, 255, 255, 0.22);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.25);
       color: #f8fafc;
       padding: 7px 11px;
       border-radius: 10px;
@@ -196,19 +202,19 @@
       transform: scale(0.95);
     }
 
-    /* Toast Notification for Preset / Settings */
+    /* Toast Notification */
     #toast {
       position: absolute;
       top: 90px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(15, 23, 42, 0.92);
+      background: rgba(15, 23, 42, 0.94);
       border: 1px solid #38bdf8;
-      box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+      box-shadow: 0 0 24px rgba(56, 189, 248, 0.6);
       color: #fff;
       font-weight: 800;
       font-size: 13px;
-      padding: 8px 18px;
+      padding: 8px 20px;
       border-radius: 999px;
       pointer-events: none;
       opacity: 0;
@@ -245,14 +251,14 @@
       width: 82px;
       height: 82px;
       border-radius: 20px;
-      background: linear-gradient(180deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%);
-      border: 2px solid rgba(255, 255, 255, 0.25);
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.98) 100%);
+      border: 2px solid rgba(255, 255, 255, 0.28);
       color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       touch-action: none;
@@ -273,7 +279,7 @@
       background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%) !important;
       border-color: #38bdf8 !important;
       transform: scale(0.92);
-      box-shadow: 0 0 20px rgba(56, 189, 248, 0.7);
+      box-shadow: 0 0 24px rgba(56, 189, 248, 0.8);
     }
 
     .pedal-cluster {
@@ -289,7 +295,7 @@
       width: 78px;
       height: 56px;
       border-radius: 16px;
-      background: linear-gradient(180deg, rgba(234, 88, 12, 0.3) 0%, rgba(154, 52, 18, 0.7) 100%);
+      background: linear-gradient(180deg, rgba(234, 88, 12, 0.35) 0%, rgba(154, 52, 18, 0.75) 100%);
       border: 2px solid #ea580c;
       color: #ffedd5;
       font-size: 13px;
@@ -307,14 +313,14 @@
       background: #ea580c !important;
       color: #fff !important;
       transform: scale(0.94);
-      box-shadow: 0 0 24px rgba(234, 88, 12, 0.8);
+      box-shadow: 0 0 25px rgba(234, 88, 12, 0.9);
     }
 
     .carx-btn-nos {
       width: 84px;
       height: 56px;
       border-radius: 16px;
-      background: linear-gradient(180deg, rgba(147, 51, 234, 0.3) 0%, rgba(107, 33, 168, 0.7) 100%);
+      background: linear-gradient(180deg, rgba(147, 51, 234, 0.35) 0%, rgba(107, 33, 168, 0.75) 100%);
       border: 2px solid #a855f7;
       color: #f3e8ff;
       font-size: 13px;
@@ -332,21 +338,21 @@
       background: #a855f7 !important;
       color: #fff !important;
       transform: scale(0.94);
-      box-shadow: 0 0 24px rgba(168, 85, 247, 0.8);
+      box-shadow: 0 0 25px rgba(168, 85, 247, 0.9);
     }
 
     .carx-pedal-brake {
       width: 78px;
       height: 88px;
       border-radius: 18px;
-      background: linear-gradient(180deg, rgba(51, 65, 85, 0.8) 0%, rgba(30, 41, 59, 0.95) 100%);
-      border: 2px solid rgba(255, 255, 255, 0.25);
+      background: linear-gradient(180deg, rgba(51, 65, 85, 0.85) 0%, rgba(30, 41, 59, 0.98) 100%);
+      border: 2px solid rgba(255, 255, 255, 0.28);
       color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
       cursor: pointer;
       touch-action: none;
     }
@@ -354,21 +360,21 @@
       background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%) !important;
       border-color: #fca5a5 !important;
       transform: scale(0.94);
-      box-shadow: 0 0 20px rgba(239, 68, 68, 0.7);
+      box-shadow: 0 0 22px rgba(239, 68, 68, 0.8);
     }
 
     .carx-pedal-gas {
       width: 84px;
       height: 88px;
       border-radius: 18px;
-      background: linear-gradient(180deg, rgba(51, 65, 85, 0.8) 0%, rgba(30, 41, 59, 0.95) 100%);
-      border: 2px solid rgba(255, 255, 255, 0.25);
+      background: linear-gradient(180deg, rgba(51, 65, 85, 0.85) 0%, rgba(30, 41, 59, 0.98) 100%);
+      border: 2px solid rgba(255, 255, 255, 0.28);
       color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
       cursor: pointer;
       touch-action: none;
     }
@@ -376,7 +382,7 @@
       background: linear-gradient(180deg, #10b981 0%, #047857 100%) !important;
       border-color: #6ee7b7 !important;
       transform: scale(0.94);
-      box-shadow: 0 0 20px rgba(16, 185, 129, 0.7);
+      box-shadow: 0 0 22px rgba(16, 185, 129, 0.8);
     }
 
     .pedal-title {
@@ -411,11 +417,11 @@
       cursor: pointer;
     }
     #start-screen h1 {
-      font-size: 46px;
+      font-size: 48px;
       font-weight: 900;
       letter-spacing: -1px;
       font-style: italic;
-      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #f43f5e 100%);
+      background: linear-gradient(135deg, #00f0ff 0%, #a855f7 50%, #ff007f 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       margin-bottom: 6px;
@@ -428,14 +434,14 @@
       margin-bottom: 22px;
     }
     .start-prompt {
-      background: linear-gradient(90deg, #0284c7, #2563eb);
+      background: linear-gradient(90deg, #0284c7, #9333ea);
       color: #fff;
-      padding: 14px 38px;
+      padding: 14px 40px;
       border-radius: 999px;
       font-weight: 800;
       font-size: 17px;
       letter-spacing: 1px;
-      box-shadow: 0 0 28px rgba(37, 99, 235, 0.7);
+      box-shadow: 0 0 30px rgba(147, 51, 234, 0.7);
       animation: pulse 1.6s infinite;
     }
     @keyframes pulse {
@@ -478,19 +484,19 @@
   <div id="toast">PRESET: STREET RACE</div>
 
   <div id="start-screen">
-    <h1>VELOCE: STREET</h1>
-    <p>Arcade-realistic vehicle physics, 4-wheel raycast suspension, CarX drift assist, and 7 vehicle presets.</p>
+    <h1>VELOCE: SYNTHWAVE</h1>
+    <p>Arcade-realistic car physics, anti-clip camera, synthwave neon lighting, tire smoke, and NOS flame VFX.</p>
     <div class="start-prompt">TAP OR CLICK TO RACE</div>
     <div class="controls-help-grid">
       <div class="help-card">
-        <b>📱 CarX Mobile Layout</b>
+        <b>📱 Mobile Controls</b>
         Left: ◀ and ▶ Steering Pedals<br>
         Right: GAS, BRAKE, DRIFT, NOS<br>
-        Multi-touch proof (zero stuck inputs)<br>
-        Solid metallic guardrails
+        True multi-touch support<br>
+        Solid neon barrier collisions
       </div>
       <div class="help-card">
-        <b>💻 PC Desktop Layout</b>
+        <b>💻 PC Controls</b>
         WASD / Arrows: Steer & Drive<br>
         SPACE: Handbrake / Drift<br>
         SHIFT: Nitro Boost<br>
@@ -570,54 +576,50 @@
     import * as THREE from 'three';
 
     /* ======================================================================
-       STEP 3 CUSTOMIZATION: VEHICLE CONFIGURATION PRESETS
+       1. VEHICLE PRESETS
        ====================================================================== */
     const VEHICLE_PRESETS = {
       streetRace: {
         name: 'Street Race',
         mass: 1300,
-        enginePower: 360,
-        staticFriction: 1.4,
-        dynamicFriction: 0.95,
-        driftFriction: 0.72,
+        enginePower: 380,
+        staticFriction: 1.45,
+        driftFriction: 0.75,
         suspensionK: 26000,
         suspensionC: 2600,
         suspensionRest: 0.45,
-        driftAssistStrength: 0.4,
-        driftThreshold: 0.15
+        driftAssistStrength: 0.42,
+        driftThreshold: 0.14
       },
       sportsCar: {
         name: 'Sports Car (GT)',
         mass: 1100,
-        enginePower: 450,
+        enginePower: 460,
         staticFriction: 1.55,
-        dynamicFriction: 0.98,
-        driftFriction: 0.75,
+        driftFriction: 0.78,
         suspensionK: 32000,
         suspensionC: 3200,
         suspensionRest: 0.40,
-        driftAssistStrength: 0.35,
-        driftThreshold: 0.13
+        driftAssistStrength: 0.36,
+        driftThreshold: 0.12
       },
       driftKing: {
         name: 'Drift King',
         mass: 1180,
-        enginePower: 390,
+        enginePower: 400,
         staticFriction: 1.25,
-        dynamicFriction: 0.85,
         driftFriction: 0.65,
         suspensionK: 24000,
         suspensionC: 2200,
         suspensionRest: 0.42,
-        driftAssistStrength: 0.28,
-        driftThreshold: 0.10
+        driftAssistStrength: 0.30,
+        driftThreshold: 0.09
       },
       truck: {
         name: 'Heavy Truck',
         mass: 2400,
-        enginePower: 300,
+        enginePower: 310,
         staticFriction: 1.2,
-        dynamicFriction: 0.9,
         driftFriction: 0.65,
         suspensionK: 20000,
         suspensionC: 1900,
@@ -628,41 +630,26 @@
       gripMonster: {
         name: 'Grip Monster',
         mass: 1380,
-        enginePower: 420,
-        staticFriction: 1.65,
-        dynamicFriction: 1.0,
-        driftFriction: 0.8,
+        enginePower: 430,
+        staticFriction: 1.68,
+        driftFriction: 0.82,
         suspensionK: 34000,
         suspensionC: 3600,
         suspensionRest: 0.42,
-        driftAssistStrength: 0.7,
+        driftAssistStrength: 0.72,
         driftThreshold: 0.25
-      },
-      offRoad: {
-        name: 'Off-Road 4x4',
-        mass: 1750,
-        enginePower: 330,
-        staticFriction: 1.3,
-        dynamicFriction: 0.92,
-        driftFriction: 0.7,
-        suspensionK: 18000,
-        suspensionC: 1700,
-        suspensionRest: 0.58,
-        driftAssistStrength: 0.5,
-        driftThreshold: 0.18
       },
       arcadeRacer: {
         name: 'Arcade Ultra',
         mass: 1200,
-        enginePower: 520,
-        staticFriction: 1.7,
-        dynamicFriction: 1.0,
-        driftFriction: 0.82,
+        enginePower: 540,
+        staticFriction: 1.72,
+        driftFriction: 0.85,
         suspensionK: 25000,
         suspensionC: 2500,
         suspensionRest: 0.44,
         driftAssistStrength: 0.25,
-        driftThreshold: 0.14
+        driftThreshold: 0.13
       }
     };
 
@@ -670,7 +657,29 @@
     let currentPresetIndex = 0;
 
     /* ======================================================================
-       STEP 2 PLAY: PRODUCTION VEHICLE PHYSICS ENGINE
+       2. ROAD & GROUND ELEVATION
+       ====================================================================== */
+    const ROAD_WIDTH = 14;
+    const CHUNK_LENGTH = 160;
+    const NUM_CHUNKS = 8;
+    const CHUNK_SEGMENTS = 40;
+
+    function getRoadOffset(z) {
+      const x = Math.sin(z * 0.011) * 22 + Math.cos(z * 0.004) * 40;
+      const y = Math.sin(z * 0.007) * 5.5;
+      return { x, y };
+    }
+
+    function getGroundHeight(x, z) {
+      const spine = getRoadOffset(z);
+      const dist = Math.abs(x - spine.x);
+      const hill = Math.sin(x * 0.04 + z * 0.015) * 4;
+      const blend = Math.min(1.0, Math.max(0.0, (dist - ROAD_WIDTH * 0.5) / 16.0));
+      return spine.y + hill * blend;
+    }
+
+    /* ======================================================================
+       3. HIGH-QUALITY PHYSICS WITH WEIGHT & DRIFT SNAP-BACK
        ====================================================================== */
     class VehiclePhysics {
       constructor(vehicleRoot, chassisRoot, config = {}) {
@@ -682,8 +691,8 @@
         this.position = new THREE.Vector3(0, 0, 0);
         this.yaw = 0;
 
-        this.currentGear = 1;
-        this.rpm = 0;
+        this.currentGear = '1ST';
+        this.rpm = 1000;
         this.nitroFuel = 100;
         this.nitroActive = false;
 
@@ -698,15 +707,10 @@
         this.wheelbase = 2.7;
         this.trackWidth = 1.7;
         this.wheelRadius = 0.35;
-        this.brakeTorque = 5500;
-        this.dragCoeff = 0.988;
+        this.brakeTorque = 5800;
 
         this.nitroPowerMult = 1.9;
         this.nitroTopSpeedMult = 1.45;
-
-        this.getGroundHeight = config.getGroundHeight || (() => 0);
-        this.getRoadOffset = config.getRoadOffset || (() => ({ x: 0, y: 0 }));
-        this.roadWidth = config.roadWidth || 14;
 
         this.collisionEvents = [];
         this.applyConfig(config);
@@ -714,15 +718,14 @@
 
       applyConfig(config) {
         this.mass = config.mass || 1300;
-        this.enginePower = config.enginePower || 360;
-        this.staticFriction = config.staticFriction || 1.4;
-        this.dynamicFriction = config.dynamicFriction || 0.95;
-        this.driftFriction = config.driftFriction || 0.72;
+        this.enginePower = config.enginePower || 380;
+        this.staticFriction = config.staticFriction || 1.45;
+        this.driftFriction = config.driftFriction || 0.75;
         this.suspensionK = config.suspensionK || 26000;
         this.suspensionC = config.suspensionC || 2600;
         this.suspensionRest = config.suspensionRest || 0.45;
-        this.driftAssistStrength = config.driftAssistStrength || 0.4;
-        this.driftThreshold = config.driftThreshold || 0.15;
+        this.driftAssistStrength = config.driftAssistStrength || 0.42;
+        this.driftThreshold = config.driftThreshold || 0.14;
       }
 
       update(dt, inputs = {}) {
@@ -762,7 +765,7 @@
           const wx = this.position.x + ox * cosY + oz * sinY;
           const wz = this.position.z - ox * sinY + oz * cosY;
 
-          const gY = this.getGroundHeight(wx, wz);
+          const gY = getGroundHeight(wx, wz);
           this.wheelHeights[i] = gY;
           if (this.position.y - gY < this.suspensionRest + 0.15) {
             contacts++;
@@ -785,13 +788,11 @@
         for (let i = 0; i < 4; i++) {
           const gY = this.wheelHeights[i];
           const currentHeight = this.position.y - gY;
-          // Compression is positive when chassis drops below rest height
           const compression = Math.max(0, this.suspensionRest - currentHeight);
 
           const springForce = this.suspensionK * compression;
           const damperForce = -this.suspensionC * this.velocity.y;
-          const netWheelForce = Math.max(0, springForce + damperForce);
-          totalSpringForce += netWheelForce;
+          totalSpringForce += Math.max(0, springForce + damperForce);
         }
 
         const accelY = (totalSpringForce / this.mass) - 9.81;
@@ -806,10 +807,13 @@
 
       updateDrivetrain(throttle, nos, dt) {
         const speed = this.velocity.length();
-        const maxSpeed = 72; // m/s (~260 km/h)
+        const maxSpeed = 74;
         const forwardRatio = Math.min(1.0, speed / maxSpeed);
 
-        if (this.velocity.dot(new THREE.Vector3(Math.sin(this.yaw), 0, Math.cos(this.yaw))) < -0.1) {
+        const forward = new THREE.Vector3(Math.sin(this.yaw), 0, Math.cos(this.yaw));
+        const forwardSpeed = this.velocity.dot(forward);
+
+        if (forwardSpeed < -0.2) {
           this.currentGear = 'REV';
         } else if (forwardRatio < 0.20) this.currentGear = '1ST';
         else if (forwardRatio < 0.42) this.currentGear = '2ND';
@@ -831,7 +835,7 @@
 
       updateTraction(throttle, steering, handbrake, dt) {
         const speed = this.velocity.length();
-        const maxSpeed = this.nitroActive ? 72 * this.nitroTopSpeedMult : 72;
+        const maxSpeed = this.nitroActive ? 74 * this.nitroTopSpeedMult : 74;
 
         let tractionForce = 0;
         if (this.groundContact) {
@@ -849,9 +853,9 @@
           }
         }
 
-        let dragForce = speed * speed * 0.35 + speed * 15;
+        let dragForce = speed * speed * 0.35 + speed * 14;
         if (handbrake) {
-          dragForce += (this.brakeTorque / this.wheelRadius) * 0.5;
+          dragForce += (this.brakeTorque / this.wheelRadius) * 0.55;
         }
 
         const netForce = tractionForce - Math.sign(speed) * dragForce;
@@ -872,28 +876,37 @@
 
         const lateralVel = this.velocity.dot(sideways);
         const forwardVel = this.velocity.dot(forward);
-        this.driftAngle = Math.atan2(lateralVel, Math.max(0.5, Math.abs(forwardVel)));
+        this.driftAngle = Math.atan2(lateralVel, Math.max(0.8, Math.abs(forwardVel)));
 
-        const slipTrigger = Math.abs(this.driftAngle) > this.driftThreshold;
-        const speedTrigger = speed > 6.0;
+        const isHighSlip = Math.abs(this.driftAngle) > this.driftThreshold && speed > 5.5;
+        const isPowerSlide = handbrake && speed > 4.5 && Math.abs(steering) > 0.05;
 
-        if ((slipTrigger && speedTrigger) || (handbrake && speed > 5.0 && Math.abs(steering) > 0.1)) {
+        if (isHighSlip || isPowerSlide) {
           this.isDrifting = true;
-          this.driftMultiplier = Math.min(5.0, this.driftMultiplier + dt * 0.85);
-          const intensity = Math.abs(this.driftAngle) * speed * 25;
-          this.driftPoints += Math.floor(intensity * this.driftMultiplier);
+          this.driftMultiplier = Math.min(5.0, this.driftMultiplier + dt * 0.95);
 
-          const counterTorque = -this.driftAngle * this.driftAssistStrength * 2.2;
-          this.angularVelocity.y += counterTorque * dt;
+          const slideTorque = -this.driftAngle * (handbrake ? 3.6 : 2.2);
+          this.angularVelocity.y += slideTorque * dt;
+          this.angularVelocity.y *= 0.91; // Rotational inertia damping
+
+          const intensity = Math.abs(this.driftAngle) * speed * 30;
+          this.driftPoints += Math.floor(intensity * this.driftMultiplier);
         } else {
           this.isDrifting = false;
-          this.driftMultiplier = 1.0;
+          this.driftMultiplier = THREE.MathUtils.lerp(this.driftMultiplier, 1.0, 4.0 * dt);
+
+          if (speed > 2.0) {
+            const velHeading = Math.atan2(this.velocity.x, this.velocity.z);
+            const diff = THREE.MathUtils.euclideanModulo(velHeading - this.yaw + Math.PI, Math.PI * 2) - Math.PI;
+            this.angularVelocity.y += diff * 5.5 * dt; // Counter-steer snap-back torque
+          }
+          this.angularVelocity.y *= 0.80;
         }
       }
 
       updateSteering(steering, handbrake, dt) {
         const speed = this.velocity.length();
-        const maxSteerAngle = 0.55;
+        const maxSteerAngle = 0.54;
         const speedDamp = Math.max(0.35, 1 - speed / 90);
         const steerAngle = steering * maxSteerAngle * speedDamp;
 
@@ -912,7 +925,7 @@
         this.yaw += this.angularVelocity.y * dt;
 
         const grip = this.isDrifting ? this.driftFriction : this.staticFriction;
-        const blendFactor = Math.min(0.22, (grip * 1.5) * dt * (speed / 15));
+        const blendFactor = Math.min(0.24, (grip * 1.5) * dt * (speed / 15));
         const targetVelocity = forward.multiplyScalar(forwardSpeed);
         this.velocity.lerp(targetVelocity, blendFactor);
       }
@@ -921,8 +934,8 @@
         const speed = this.velocity.length();
         const speedRatio = Math.min(1.0, speed / 50);
 
-        const spineAhead = this.getRoadOffset(this.position.z + 5);
-        const spineBehind = this.getRoadOffset(this.position.z - 5);
+        const spineAhead = getRoadOffset(this.position.z + 5);
+        const spineBehind = getRoadOffset(this.position.z - 5);
         const roadPitch = Math.atan2(spineAhead.y - spineBehind.y, 10);
 
         const accelPitch = (throttle > 0 ? -0.05 : (throttle < 0 ? 0.09 : 0.0)) * speedRatio;
@@ -952,19 +965,22 @@
       }
 
       checkRoadBoundaries() {
-        const spine = this.getRoadOffset(this.position.z);
-        const halfWidth = this.roadWidth * 0.5 - 1.25;
+        const spine = getRoadOffset(this.position.z);
+        const halfWidth = ROAD_WIDTH * 0.5 - 1.25;
         const dx = this.position.x - spine.x;
+        const restitution = 0.35;
 
         if (dx > halfWidth) {
           this.position.x = spine.x + halfWidth;
-          this.velocity.x = -Math.abs(this.velocity.x) * 0.35;
-          this.velocity.multiplyScalar(0.88);
+          if (this.velocity.x > 0) this.velocity.x = -this.velocity.x * restitution;
+          this.velocity.z *= 0.88;
+          this.yaw -= 0.03;
           this.collisionEvents.push({ side: 'right', pos: this.position.clone() });
         } else if (dx < -halfWidth) {
           this.position.x = spine.x - halfWidth;
-          this.velocity.x = Math.abs(this.velocity.x) * 0.35;
-          this.velocity.multiplyScalar(0.88);
+          if (this.velocity.x < 0) this.velocity.x = -this.velocity.x * restitution;
+          this.velocity.z *= 0.88;
+          this.yaw += 0.03;
           this.collisionEvents.push({ side: 'left', pos: this.position.clone() });
         }
       }
@@ -1005,7 +1021,168 @@
     }
 
     /* ======================================================================
-       PROCEDURAL WEB AUDIO SYNTHESIZER
+       4. ROBUST ANTI-CLIP CHASE CAMERA
+       ====================================================================== */
+    class ChaseCamera {
+      constructor(camera, getGroundHeight) {
+        this.camera = camera;
+        this.getGroundHeight = getGroundHeight;
+
+        this.distance = 7.6;
+        this.height = 3.3;
+        this.minGroundClearance = 1.3;
+        this.minCarDistance = 4.6;
+        this.posLerp = 0.14;
+        this.lookLerp = 0.20;
+
+        this.currentPosition = new THREE.Vector3();
+        this.currentLookAt = new THREE.Vector3();
+        this.smoothedHeading = new THREE.Vector2(0, 1);
+      }
+
+      update(carPos, carYaw, isNos, dt) {
+        const targetFov = isNos ? 74 : 60;
+        this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, targetFov, 0.1);
+        this.camera.updateProjectionMatrix();
+
+        const targetHeading = new THREE.Vector2(Math.sin(carYaw), Math.cos(carYaw));
+        this.smoothedHeading.lerp(targetHeading, Math.min(1.0, 7.5 * dt));
+
+        const backX = -this.smoothedHeading.x * this.distance;
+        const backZ = -this.smoothedHeading.y * this.distance;
+
+        let targetX = carPos.x + backX;
+        let targetY = carPos.y + this.height;
+        let targetZ = carPos.z + backZ;
+
+        const groundUnderCam = this.getGroundHeight(targetX, targetZ);
+        if (targetY < groundUnderCam + this.minGroundClearance) {
+          targetY = groundUnderCam + this.minGroundClearance;
+        }
+
+        const desiredPos = new THREE.Vector3(targetX, targetY, targetZ);
+        const toCam = desiredPos.clone().sub(carPos);
+        if (toCam.length() < this.minCarDistance) {
+          toCam.normalize().multiplyScalar(this.minCarDistance);
+          desiredPos.copy(carPos).add(toCam);
+          desiredPos.y = Math.max(desiredPos.y, groundUnderCam + this.minGroundClearance);
+        }
+
+        this.currentPosition.lerp(desiredPos, this.posLerp);
+        this.camera.position.copy(this.currentPosition);
+
+        const targetAim = new THREE.Vector3(
+          carPos.x + this.smoothedHeading.x * 4.0,
+          carPos.y + 1.15,
+          carPos.z + this.smoothedHeading.y * 4.0
+        );
+        this.currentLookAt.lerp(targetAim, this.lookLerp);
+        this.camera.lookAt(this.currentLookAt);
+      }
+    }
+
+    /* ======================================================================
+       5. VFX SYSTEM (TIRE SMOKE, DUAL NOS FLAMES, SPARKS)
+       ====================================================================== */
+    class VFXManager {
+      constructor(scene) {
+        this.scene = scene;
+
+        this.smokeCount = 100;
+        this.smokeGeo = new THREE.BufferGeometry();
+        this.smokePositions = new Float32Array(this.smokeCount * 3);
+        this.smokeGeo.setAttribute('position', new THREE.BufferAttribute(this.smokePositions, 3));
+        this.smokeMat = new THREE.PointsMaterial({
+          color: 0xcccccc,
+          size: 1.3,
+          transparent: true,
+          opacity: 0.38,
+          depthWrite: false
+        });
+        this.smokeParticles = new THREE.Points(this.smokeGeo, this.smokeMat);
+        scene.add(this.smokeParticles);
+        this.smokeIdx = 0;
+
+        this.sparkCount = 80;
+        this.sparkGeo = new THREE.BufferGeometry();
+        this.sparkPositions = new Float32Array(this.sparkCount * 3);
+        this.sparkGeo.setAttribute('position', new THREE.BufferAttribute(this.sparkPositions, 3));
+        this.sparkMat = new THREE.PointsMaterial({
+          color: 0xffaa00,
+          size: 0.65,
+          transparent: true,
+          opacity: 0.85
+        });
+        this.sparkParticles = new THREE.Points(this.sparkGeo, this.sparkMat);
+        scene.add(this.sparkParticles);
+        this.sparkIdx = 0;
+
+        const flameGeo = new THREE.ConeGeometry(0.15, 0.9, 8);
+        flameGeo.rotateX(Math.PI / 2);
+        const flameMat = new THREE.MeshBasicMaterial({
+          color: 0x00d4ff,
+          transparent: true,
+          opacity: 0.9
+        });
+
+        this.flameLeft = new THREE.Mesh(flameGeo, flameMat);
+        this.flameRight = new THREE.Mesh(flameGeo, flameMat);
+        this.flameLeft.position.set(-0.45, 0.4, -2.3);
+        this.flameRight.position.set(0.45, 0.4, -2.3);
+
+        this.flameGroup = new THREE.Group();
+        this.flameGroup.add(this.flameLeft);
+        this.flameGroup.add(this.flameRight);
+        this.flameGroup.visible = false;
+      }
+
+      attachToChassis(chassis) {
+        chassis.add(this.flameGroup);
+      }
+
+      emitDriftSmoke(pos, yaw) {
+        const arr = this.smokeGeo.attributes.position.array;
+        const cosY = Math.cos(yaw);
+        const sinY = Math.sin(yaw);
+
+        for (let i = 0; i < 2; i++) {
+          const idx = (this.smokeIdx % this.smokeCount) * 3;
+          const side = (Math.random() - 0.5) * 1.6;
+          arr[idx] = pos.x - sinY * 1.8 + cosY * side;
+          arr[idx + 1] = pos.y + 0.15;
+          arr[idx + 2] = pos.z - cosY * 1.8 - sinY * side;
+          this.smokeIdx++;
+        }
+        this.smokeGeo.attributes.position.needsUpdate = true;
+      }
+
+      emitSparks(pos, side) {
+        const arr = this.sparkGeo.attributes.position.array;
+        for (let i = 0; i < 3; i++) {
+          const idx = (this.sparkIdx % this.sparkCount) * 3;
+          arr[idx] = pos.x + (side === 'right' ? 1.1 : -1.1);
+          arr[idx + 1] = pos.y + 0.35 + Math.random() * 0.3;
+          arr[idx + 2] = pos.z + (Math.random() - 0.5) * 1.5;
+          this.sparkIdx++;
+        }
+        this.sparkGeo.attributes.position.needsUpdate = true;
+      }
+
+      update(isDrifting, isNos, pos, yaw) {
+        if (isDrifting) {
+          this.emitDriftSmoke(pos, yaw);
+        }
+        this.flameGroup.visible = isNos;
+        if (isNos) {
+          const flicker = 0.8 + Math.random() * 0.4;
+          this.flameLeft.scale.set(flicker, flicker, 1.0 + Math.random() * 0.5);
+          this.flameRight.scale.copy(this.flameLeft.scale);
+        }
+      }
+    }
+
+    /* ======================================================================
+       6. WEB AUDIO ENGINE
        ====================================================================== */
     class SoundEngine {
       constructor() {
@@ -1107,7 +1284,7 @@
         const g = this.ctx.createGain();
         osc.frequency.setValueAtTime(95, this.ctx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.15);
-        g.gain.setValueAtTime(0.2, this.ctx.currentTime);
+        g.gain.setValueAtTime(0.22, this.ctx.currentTime);
         g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
         osc.connect(g);
         g.connect(this.ctx.destination);
@@ -1131,66 +1308,54 @@
     const audio = new SoundEngine();
 
     /* ======================================================================
-       THREE.JS SETUP & ATMOSPHERE
+       7. THREE.JS SCENE & UPGRADED SYNTHWAVE LIGHTING
        ====================================================================== */
     const canvas = document.getElementById('game-canvas');
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x060913);
-    scene.fog = new THREE.FogExp2(0x060913, 0.008);
+    scene.background = new THREE.Color(0x02040a);
+    scene.fog = new THREE.FogExp2(0x02040a, 0.0075);
 
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 800);
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 900);
+    const chaseCamera = new ChaseCamera(camera, getGroundHeight);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+    const ambientLight = new THREE.AmbientLight(0x38bdf8, 0.45);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xfffaed, 1.8);
-    dirLight.position.set(40, 80, 40);
+    const dirLight = new THREE.DirectionalLight(0xfffaed, 1.9);
+    dirLight.position.set(40, 75, 30);
     dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = 1024;
-    dirLight.shadow.mapSize.height = 1024;
-    dirLight.shadow.camera.near = 10;
-    dirLight.shadow.camera.far = 250;
-    dirLight.shadow.camera.left = -50;
-    dirLight.shadow.camera.right = 50;
-    dirLight.shadow.camera.top = 50;
-    dirLight.shadow.camera.bottom = -50;
+    dirLight.shadow.bias = -0.0004;
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+    dirLight.shadow.camera.near = 5;
+    dirLight.shadow.camera.far = 180;
+    dirLight.shadow.camera.left = -35;
+    dirLight.shadow.camera.right = 35;
+    dirLight.shadow.camera.top = 35;
+    dirLight.shadow.camera.bottom = -35;
     scene.add(dirLight);
+
+    const rimLight = new THREE.DirectionalLight(0xd946ef, 1.2);
+    rimLight.position.set(-50, 20, -50);
+    scene.add(rimLight);
 
     const seaGroundGeo = new THREE.PlaneGeometry(1600, 1600);
     seaGroundGeo.rotateX(-Math.PI / 2);
-    const seaGroundMat = new THREE.MeshStandardMaterial({ color: 0x05130b, roughness: 1.0 });
+    const seaGroundMat = new THREE.MeshStandardMaterial({ color: 0x050c18, roughness: 1.0 });
     const infiniteGround = new THREE.Mesh(seaGroundGeo, seaGroundMat);
     infiniteGround.position.y = -1.5;
     scene.add(infiniteGround);
 
     /* ======================================================================
-       ROADWAY, TERRAIN, & METALLIC GUARDRAILS
+       8. CHUNK GENERATOR WITH SYNTHWAVE NEON GUARDRAILS
        ====================================================================== */
-    const ROAD_WIDTH = 14;
-    const CHUNK_LENGTH = 160;
-    const NUM_CHUNKS = 8;
-    const CHUNK_SEGMENTS = 40;
-
-    function getRoadOffset(z) {
-      const x = Math.sin(z * 0.011) * 22 + Math.cos(z * 0.004) * 40;
-      const y = Math.sin(z * 0.007) * 5.5;
-      return { x, y };
-    }
-
-    function getGroundHeight(x, z) {
-      const spine = getRoadOffset(z);
-      const dist = Math.abs(x - spine.x);
-      const hill = Math.sin(x * 0.04 + z * 0.015) * 4;
-      const blend = Math.min(1.0, Math.max(0.0, (dist - ROAD_WIDTH * 0.5) / 16.0));
-      return spine.y + hill * blend;
-    }
-
     class RoadChunk {
       constructor(index) {
         this.index = index;
@@ -1200,9 +1365,9 @@
         this.roadGeo = new THREE.PlaneGeometry(ROAD_WIDTH, CHUNK_LENGTH, 1, CHUNK_SEGMENTS);
         this.roadGeo.rotateX(-Math.PI / 2);
         this.roadMat = new THREE.MeshStandardMaterial({
-          color: 0x181820,
-          roughness: 0.75,
-          metalness: 0.25
+          color: 0x121318,
+          roughness: 0.65,
+          metalness: 0.35
         });
         this.roadMesh = new THREE.Mesh(this.roadGeo, this.roadMat);
         this.roadMesh.receiveShadow = true;
@@ -1210,27 +1375,33 @@
 
         const stripeGeo = new THREE.PlaneGeometry(0.35, CHUNK_LENGTH, 1, CHUNK_SEGMENTS);
         stripeGeo.rotateX(-Math.PI / 2);
-        const stripeMat = new THREE.MeshBasicMaterial({ color: 0xffea00 });
+        const stripeMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
         this.stripeMesh = new THREE.Mesh(stripeGeo, stripeMat);
         this.stripeMesh.position.y = 0.02;
         this.group.add(this.stripeMesh);
 
         this.groundGeo = new THREE.PlaneGeometry(220, CHUNK_LENGTH, 20, CHUNK_SEGMENTS);
         this.groundGeo.rotateX(-Math.PI / 2);
-        this.groundMat = new THREE.MeshStandardMaterial({
-          color: 0x0a2215,
+        const groundMat = new THREE.MeshStandardMaterial({
+          color: 0x07111e,
           roughness: 0.95
         });
-        this.groundMesh = new THREE.Mesh(this.groundGeo, this.groundMat);
+        this.groundMesh = new THREE.Mesh(this.groundGeo, groundMat);
         this.groundMesh.position.y = -0.06;
         this.groundMesh.receiveShadow = true;
         this.group.add(this.groundMesh);
 
         this.leftRailGeo = new THREE.BufferGeometry();
         this.rightRailGeo = new THREE.BufferGeometry();
-        const railMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.25 });
-        this.leftRailMesh = new THREE.Mesh(this.leftRailGeo, railMat);
-        this.rightRailMesh = new THREE.Mesh(this.rightRailGeo, railMat);
+        const neonRailMat = new THREE.MeshStandardMaterial({
+          color: 0x0f172a,
+          emissive: 0x00f0ff,
+          emissiveIntensity: 0.85,
+          roughness: 0.2,
+          metalness: 0.8
+        });
+        this.leftRailMesh = new THREE.Mesh(this.leftRailGeo, neonRailMat);
+        this.rightRailMesh = new THREE.Mesh(this.rightRailGeo, neonRailMat);
         this.group.add(this.leftRailMesh);
         this.group.add(this.rightRailMesh);
 
@@ -1349,7 +1520,7 @@
 
           rightVerts.push(
             rxA, ryA_bot, zA,  rxA, ryA_top, zA,  rxB, ryB_bot, zB,
-            rxA, ryA_top, zA,  rxB, ryB_bot, zB,  rxB, ryB_top, zB
+            rxA, ryA_top, zA,  rxB, ryB_top, zB,  rxB, ryB_bot, zB
           );
         }
 
@@ -1365,14 +1536,14 @@
       const g = new THREE.Group();
       const trunk = new THREE.Mesh(
         new THREE.CylinderGeometry(0.3, 0.45, 2.8, 5),
-        new THREE.MeshStandardMaterial({ color: 0x3d2817, roughness: 0.9 })
+        new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 })
       );
       trunk.position.y = 1.4;
       g.add(trunk);
 
       const foliage = new THREE.Mesh(
         new THREE.ConeGeometry(2.2, 5.0, 5),
-        new THREE.MeshStandardMaterial({ color: 0x113d22, roughness: 0.8, flatShading: true })
+        new THREE.MeshStandardMaterial({ color: 0x064e3b, roughness: 0.8, flatShading: true })
       );
       foliage.position.y = 4.4;
       g.add(foliage);
@@ -1387,9 +1558,9 @@
     }
 
     /* ======================================================================
-       PROCEDURAL SPORTS CAR VISUALS
+       9. SPORTS CAR MESH
        ====================================================================== */
-    const carColors = [0x10b981, 0xef4444, 0x3b82f6, 0xf59e0b, 0x8b5cf6, 0xec4899, 0xf8fafc];
+    const carColors = [0x10b981, 0xef4444, 0x3b82f6, 0xf59e0b, 0xa855f7, 0xec4899, 0xf8fafc];
     let currentColorIndex = 0;
 
     const carRoot = new THREE.Group();
@@ -1398,15 +1569,16 @@
 
     const bodyMat = new THREE.MeshStandardMaterial({
       color: carColors[currentColorIndex],
-      metalness: 0.75,
-      roughness: 0.2
+      metalness: 0.8,
+      roughness: 0.18
     });
     const bodyMesh = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.65, 4.4), bodyMat);
     bodyMesh.position.y = 0.55;
     bodyMesh.castShadow = true;
+    bodyMesh.receiveShadow = true;
     chassisRoot.add(bodyMesh);
 
-    const cabinMat = new THREE.MeshStandardMaterial({ color: 0x05070a, metalness: 0.95, roughness: 0.05 });
+    const cabinMat = new THREE.MeshStandardMaterial({ color: 0x020408, metalness: 0.95, roughness: 0.05 });
     const cabinMesh = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.55, 2.2), cabinMat);
     cabinMesh.position.set(0, 1.05, -0.3);
     cabinMesh.castShadow = true;
@@ -1429,7 +1601,7 @@
     headLightMeshL.position.x = -0.7;
     chassisRoot.add(headLightMeshL);
 
-    const tailLightMat = new THREE.MeshBasicMaterial({ color: 0xff1122 });
+    const tailLightMat = new THREE.MeshBasicMaterial({ color: 0xff0055 });
     const tailLightR = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.15, 0.1), tailLightMat);
     tailLightR.position.set(0.7, 0.6, -2.22);
     chassisRoot.add(tailLightR);
@@ -1437,14 +1609,14 @@
     tailLightL.position.x = -0.7;
     chassisRoot.add(tailLightL);
 
-    const underglowLight = new THREE.PointLight(0x00f0ff, 2.5, 8);
+    const underglowLight = new THREE.PointLight(0x00f0ff, 3.0, 9);
     underglowLight.position.set(0, 0.2, 0);
     chassisRoot.add(underglowLight);
 
     const wheelMeshes = [];
     const wheelGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.35, 18);
     wheelGeo.rotateZ(Math.PI / 2);
-    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x18181c, roughness: 0.9 });
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x141418, roughness: 0.9 });
     const rimMat = new THREE.MeshStandardMaterial({ color: 0xd4d4d8, metalness: 0.85, roughness: 0.2 });
 
     const wheelOffsets = [
@@ -1470,103 +1642,109 @@
       wheelMeshes.push({ holder, mesh: wMesh, front: pos.front });
     });
 
-    const SPARK_COUNT = 80;
-    const sparkGeo = new THREE.BufferGeometry();
-    const sparkPos = new Float32Array(SPARK_COUNT * 3);
-    sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPos, 3));
-    const sparkMat = new THREE.PointsMaterial({ color: 0xffaa33, size: 0.6, transparent: true, opacity: 0.8 });
-    const sparkPoints = new THREE.Points(sparkGeo, sparkMat);
-    scene.add(sparkPoints);
-    let sparkIdx = 0;
-
     scene.add(carRoot);
 
-    const physics = new VehiclePhysics(carRoot, chassisRoot, {
-      ...VEHICLE_PRESETS.streetRace,
-      getGroundHeight,
-      getRoadOffset,
-      roadWidth: ROAD_WIDTH
-    });
+    const vfx = new VFXManager(scene);
+    vfx.attachToChassis(chassisRoot);
 
+    const physics = new VehiclePhysics(carRoot, chassisRoot, VEHICLE_PRESETS.streetRace);
     const initSpine = getRoadOffset(0);
     physics.reset(initSpine.x, initSpine.y + 0.5, 0, 0);
 
     /* ======================================================================
-       INPUT ENGINE (CARX ARROW BUTTONS + KEYBOARD + GAMEPAD)
+       10. MULTI-TOUCH CONTROLLER
        ====================================================================== */
     const inputState = {
+      steer: 0,
       steerTarget: 0,
-      currentSteer: 0,
       throttle: 0,
       handbrake: false,
       nos: false
     };
 
-    let keyLeft = false, keyRight = false, keyGas = false, keyBrake = false;
+    const activePointers = new Map();
 
-    window.addEventListener('keydown', (e) => {
-      const k = e.key.toLowerCase();
-      if (k === 'a' || k === 'arrowleft') keyLeft = true;
-      if (k === 'd' || k === 'arrowright') keyRight = true;
-      if (k === 'w' || k === 'arrowup') keyGas = true;
-      if (k === 's' || k === 'arrowdown') keyBrake = true;
-      if (k === ' ') inputState.handbrake = true;
-      if (k === 'shift') inputState.nos = true;
-      if (k === 'r') resetCar();
-      if (k === 'c') toggleCamera();
-      if (k === 'p') cyclePreset();
-      audio.init();
-    });
-
-    window.addEventListener('keyup', (e) => {
-      const k = e.key.toLowerCase();
-      if (k === 'a' || k === 'arrowleft') keyLeft = false;
-      if (k === 'd' || k === 'arrowright') keyRight = false;
-      if (k === 'w' || k === 'arrowup') keyGas = false;
-      if (k === 's' || k === 'arrowdown') keyBrake = false;
-      if (k === ' ') inputState.handbrake = false;
-      if (k === 'shift') inputState.nos = false;
-    });
-
-    function bindTouchAction(id, onState) {
-      const el = document.getElementById(id);
-      let pId = null;
+    function bindButton(elementId, onState) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
 
       el.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         e.stopPropagation();
         audio.init();
-        pId = e.pointerId;
-        el.classList.add('active');
+        activePointers.set(e.pointerId, elementId);
         el.setPointerCapture(e.pointerId);
+        el.classList.add('active');
         onState(true);
       });
 
-      const release = (e) => {
-        if (e.pointerId === pId) {
-          pId = null;
+      const endAction = (e) => {
+        if (activePointers.get(e.pointerId) === elementId) {
+          activePointers.delete(e.pointerId);
           el.classList.remove('active');
           onState(false);
           try { el.releasePointerCapture(e.pointerId); } catch (_) {}
         }
       };
 
-      el.addEventListener('pointerup', release);
-      el.addEventListener('pointercancel', release);
-      el.addEventListener('pointerleave', release);
+      el.addEventListener('pointerup', endAction);
+      el.addEventListener('pointercancel', endAction);
+      el.addEventListener('pointerleave', endAction);
     }
 
-    let touchLeft = false, touchRight = false, touchGas = false, touchBrake = false;
+    let leftDown = false, rightDown = false, gasDown = false, brakeDown = false;
 
-    bindTouchAction('btn-steer-left', (val) => { touchLeft = val; });
-    bindTouchAction('btn-steer-right', (val) => { touchRight = val; });
-    bindTouchAction('btn-gas', (val) => { touchGas = val; });
-    bindTouchAction('btn-brake', (val) => { touchBrake = val; });
-    bindTouchAction('btn-drift', (val) => {
-      inputState.handbrake = val;
-      if (val && navigator.vibrate) navigator.vibrate(15);
+    bindButton('btn-steer-left', (down) => {
+      leftDown = down;
+      inputState.steerTarget = (rightDown ? 1 : 0) - (leftDown ? 1 : 0);
     });
-    bindTouchAction('btn-nos', (val) => { inputState.nos = val; });
+    bindButton('btn-steer-right', (down) => {
+      rightDown = down;
+      inputState.steerTarget = (rightDown ? 1 : 0) - (leftDown ? 1 : 0);
+    });
+    bindButton('btn-gas', (down) => {
+      gasDown = down;
+      inputState.throttle = (gasDown ? 1 : 0) - (brakeDown ? 1 : 0);
+    });
+    bindButton('btn-brake', (down) => {
+      brakeDown = down;
+      inputState.throttle = (gasDown ? 1 : 0) - (brakeDown ? 1 : 0);
+    });
+    bindButton('btn-drift', (down) => {
+      inputState.handbrake = down;
+      if (down && navigator.vibrate) navigator.vibrate(15);
+    });
+    bindButton('btn-nos', (down) => {
+      inputState.nos = down;
+    });
+
+    const keys = {};
+    window.addEventListener('keydown', (e) => {
+      const k = e.key.toLowerCase();
+      keys[k] = true;
+      audio.init();
+      if (k === 'r') resetCar();
+      if (k === 'c') toggleCamera();
+      if (k === 'p') cyclePreset();
+      syncKeys();
+    });
+    window.addEventListener('keyup', (e) => {
+      keys[e.key.toLowerCase()] = false;
+      syncKeys();
+    });
+
+    function syncKeys() {
+      if (activePointers.size === 0) {
+        const l = keys['a'] || keys['arrowleft'];
+        const r = keys['d'] || keys['arrowright'];
+        const g = keys['w'] || keys['arrowup'];
+        const b = keys['s'] || keys['arrowdown'];
+        inputState.steerTarget = (r ? 1 : 0) - (l ? 1 : 0);
+        inputState.throttle = (g ? 1 : 0) - (b ? 1 : 0);
+        inputState.handbrake = !!keys[' '];
+        inputState.nos = !!keys['shift'];
+      }
+    }
 
     const toast = document.getElementById('toast');
     let toastTimer = null;
@@ -1595,7 +1773,7 @@
 
     let cameraMode = 0;
     function toggleCamera() {
-      cameraMode = (cameraMode + 1) % 3;
+      cameraMode = (cameraMode + 1) % 2;
     }
 
     document.getElementById('btn-preset').addEventListener('click', cyclePreset);
@@ -1616,35 +1794,8 @@
       audio.init();
     });
 
-    function pollInputs() {
-      let l = keyLeft || touchLeft;
-      let r = keyRight || touchRight;
-      let g = keyGas || touchGas;
-      let b = keyBrake || touchBrake;
-
-      const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
-      if (gamepads && gamepads[0]) {
-        const gp = gamepads[0];
-        if (Math.abs(gp.axes[0]) > 0.15) {
-          if (gp.axes[0] < -0.15) l = true;
-          if (gp.axes[0] > 0.15) r = true;
-        }
-        if (gp.buttons && gp.buttons.value > 0.1) g = true;
-        if (gp.buttons && gp.buttons.value > 0.1) b = true;
-        if (gp.buttons[0] && gp.buttons[0].pressed) inputState.handbrake = true;
-        if (gp.buttons && gp.buttons.pressed) inputState.nos = true;
-      }
-
-      let rawSteer = 0;
-      if (l) rawSteer -= 1;
-      if (r) rawSteer += 1;
-      inputState.steerTarget = rawSteer;
-      inputState.currentSteer = THREE.MathUtils.lerp(inputState.currentSteer, inputState.steerTarget, 0.28);
-      inputState.throttle = (g ? 1 : 0) - (b ? 1 : 0);
-    }
-
     /* ======================================================================
-       MAIN ANIMATION & TELEMETRY SYNC LOOP
+       11. MAIN ANIMATION & RENDERING LOOP
        ====================================================================== */
     const hudSpeed = document.getElementById('hud-speed');
     const hudGear = document.getElementById('hud-gear');
@@ -1654,6 +1805,7 @@
     const hudDriftScore = document.getElementById('hud-drift-score');
     const hudDriftCombo = document.getElementById('hud-drift-combo');
 
+    let prevMultiplier = 1.0;
     let lastTime = performance.now();
 
     function animate(currentTime) {
@@ -1662,11 +1814,13 @@
       const dt = Math.min((currentTime - lastTime) / 1000, 0.05);
       lastTime = currentTime;
 
-      pollInputs();
+      inputState.steer = THREE.MathUtils.lerp(inputState.steer, inputState.steerTarget, 0.32);
 
       physics.update(dt, {
         throttle: inputState.throttle,
-        steering: inputState.currentSteer,
+        steering: inputState.steer,
+        handbrake: inputState.handbrakeState.throttle,
+        steering: inputState.steer,
         handbrake: inputState.handbrake,
         nos: inputState.nos
       });
@@ -1676,22 +1830,15 @@
       if (telem.collisions.length > 0) {
         audio.playThud();
         if (navigator.vibrate) navigator.vibrate(25);
-
-        telem.collisions.forEach((c) => {
-          const pos = sparkPoints.geometry.attributes.position.array;
-          const pIdx = (sparkIdx % SPARK_COUNT) * 3;
-          pos[pIdx] = c.pos.x + (c.side === 'right' ? 1.1 : -1.1);
-          pos[pIdx + 1] = c.pos.y + 0.35 + Math.random() * 0.3;
-          pos[pIdx + 2] = c.pos.z + (Math.random() - 0.5) * 1.5;
-          sparkPoints.geometry.attributes.position.needsUpdate = true;
-          sparkIdx++;
-        });
+        telem.collisions.forEach((c) => vfx.emitSparks(c.pos, c.side));
       }
 
       wheelMeshes.forEach((w) => {
-        if (w.front) w.holder.rotation.y = inputState.currentSteer * 0.48;
+        if (w.front) w.holder.rotation.y = inputState.steer * 0.48;
         w.mesh.rotation.x += (telem.speedKmh / 3.6) * dt * 3.0;
       });
+
+      vfx.update(telem.isDrifting, telem.nitroActive, physics.position, physics.yaw);
 
       const currentChunkIdx = Math.floor(physics.position.z / CHUNK_LENGTH);
       const minRequiredZ = (currentChunkIdx - 1) * CHUNK_LENGTH;
@@ -1708,50 +1855,21 @@
       });
 
       infiniteGround.position.set(physics.position.x, -1.0, physics.position.z);
-      dirLight.position.set(physics.position.x + 40, physics.position.y + 80, physics.position.z + 40);
+      dirLight.position.set(physics.position.x + 40, physics.position.y + 75, physics.position.z + 30);
       dirLight.target.position.copy(physics.position);
 
-      const camLerp = 0.14;
-      let targetCam;
       if (cameraMode === 0) {
-        const fovBoost = telem.nitroActive ? 74 : 60;
-        camera.fov = THREE.MathUtils.lerp(camera.fov, fovBoost, 0.1);
-        camera.updateProjectionMatrix();
-
-        targetCam = new THREE.Vector3(
-          physics.position.x - Math.sin(physics.yaw) * 8.6,
-          physics.position.y + 3.6,
-          physics.position.z - Math.cos(physics.yaw) * 8.6
-        );
-        camera.position.lerp(targetCam, camLerp);
-        camera.lookAt(
-          physics.position.x + Math.sin(physics.yaw) * 4.5,
-          physics.position.y + 1.1,
-          physics.position.z + Math.cos(physics.yaw) * 4.5
-        );
-      } else if (cameraMode === 1) {
-        targetCam = new THREE.Vector3(
+        chaseCamera.update(physics.position, physics.yaw, telem.nitroActive, dt);
+      } else {
+        camera.position.set(
           physics.position.x + Math.sin(physics.yaw) * 0.6,
           physics.position.y + 1.35,
           physics.position.z + Math.cos(physics.yaw) * 0.6
         );
-        camera.position.copy(targetCam);
         camera.lookAt(
           physics.position.x + Math.sin(physics.yaw) * 30,
           physics.position.y + 1.0,
           physics.position.z + Math.cos(physics.yaw) * 30
-        );
-      } else {
-        targetCam = new THREE.Vector3(
-          physics.position.x - Math.sin(physics.yaw) * 5.4,
-          physics.position.y + 2.0,
-          physics.position.z - Math.cos(physics.yaw) * 5.4
-        );
-        camera.position.lerp(targetCam, camLerp);
-        camera.lookAt(
-          physics.position.x + Math.sin(physics.yaw) * 5,
-          physics.position.y + 0.8,
-          physics.position.z + Math.cos(physics.yaw) * 5
         );
       }
 
@@ -1766,8 +1884,16 @@
         hudDriftBanner.classList.add('active');
         hudDriftScore.innerText = `+${telem.driftPoints} DRIFT`;
         hudDriftCombo.innerText = `${telem.driftMultiplier}x MULTIPLIER`;
+
+        const curMult = parseFloat(telem.driftMultiplier);
+        if (curMult > prevMultiplier) {
+          hudDriftBanner.classList.add('pulse');
+          setTimeout(() => hudDriftBanner.classList.remove('pulse'), 90);
+          prevMultiplier = curMult;
+        }
       } else {
         hudDriftBanner.classList.remove('active');
+        prevMultiplier = 1.0;
       }
 
       renderer.render(scene, camera);
