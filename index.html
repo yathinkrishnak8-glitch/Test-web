@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Veloce: CarX Street Edition</title>
+  <title>Veloce 3D: CarX Street Edition</title>
   <style>
     * {
       box-sizing: border-box;
@@ -30,7 +30,7 @@
       z-index: 1;
     }
 
-    /* CARX STREET HUD STYLING */
+    /* HUD Layout */
     #hud {
       position: absolute;
       top: 0;
@@ -42,7 +42,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: 14px 20px;
+      padding: 14px 18px;
     }
 
     .hud-top {
@@ -53,7 +53,7 @@
     }
 
     .cluster-card {
-      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(3, 7, 18, 0.9) 100%);
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.88) 0%, rgba(3, 7, 18, 0.94) 100%);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.16);
@@ -61,7 +61,7 @@
       padding: 10px 18px;
       color: #fff;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-      min-width: 180px;
+      min-width: 185px;
     }
 
     .speed-row {
@@ -88,7 +88,7 @@
     }
     .gear-badge {
       margin-left: auto;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 900;
       color: #38bdf8;
       background: rgba(56, 189, 248, 0.15);
@@ -105,7 +105,6 @@
       background: rgba(255, 255, 255, 0.15);
       border-radius: 3px;
       overflow: hidden;
-      display: flex;
     }
     .rpm-bar-fill {
       width: 0%;
@@ -125,7 +124,7 @@
       font-size: 10px;
       font-weight: 800;
       letter-spacing: 1px;
-      color: #a855f7;
+      color: #c084fc;
     }
     .nitro-bar-bg {
       flex: 1;
@@ -141,6 +140,7 @@
       box-shadow: 0 0 8px #c084fc;
     }
 
+    /* Drift Combo Banner */
     .drift-banner {
       align-self: center;
       margin-top: 10px;
@@ -168,32 +168,60 @@
       letter-spacing: 0.5px;
     }
 
+    /* Top Controls */
     .top-controls {
       display: flex;
       gap: 6px;
       pointer-events: auto;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
     .hud-btn {
-      background: rgba(15, 23, 42, 0.8);
+      background: rgba(15, 23, 42, 0.82);
       border: 1px solid rgba(255, 255, 255, 0.22);
       color: #f8fafc;
-      padding: 7px 12px;
+      padding: 7px 11px;
       border-radius: 10px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       backdrop-filter: blur(8px);
       transition: background 0.12s, transform 0.1s;
     }
     .hud-btn:active {
       background: rgba(56, 189, 248, 0.4);
-      transform: scale(0.96);
+      transform: scale(0.95);
     }
 
-    /* CARX MOBILE CONTROLS */
+    /* Toast Notification for Preset / Settings */
+    #toast {
+      position: absolute;
+      top: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid #38bdf8;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+      color: #fff;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 8px 18px;
+      border-radius: 999px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.25s, transform 0.25s;
+      z-index: 50;
+      letter-spacing: 1px;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(5px);
+    }
+
+    /* CARX STREET TOUCH BUTTONS */
     #touch-controls {
       display: flex;
       position: absolute;
@@ -205,7 +233,7 @@
       z-index: 20;
       justify-content: space-between;
       align-items: flex-end;
-      padding: 16px 24px;
+      padding: 16px 22px;
     }
 
     .steer-cluster {
@@ -364,13 +392,14 @@
       margin-top: 2px;
     }
 
+    /* Start Screen */
     #start-screen {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: radial-gradient(circle at center, rgba(15, 23, 42, 0.9) 0%, rgba(2, 6, 23, 0.98) 100%);
+      background: radial-gradient(circle at center, rgba(15, 23, 42, 0.92) 0%, rgba(2, 6, 23, 0.98) 100%);
       z-index: 100;
       display: flex;
       flex-direction: column;
@@ -417,7 +446,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
-      max-width: 440px;
+      max-width: 460px;
       margin-top: 22px;
       text-align: left;
       font-size: 12px;
@@ -446,24 +475,26 @@
 </head>
 <body>
 
+  <div id="toast">PRESET: STREET RACE</div>
+
   <div id="start-screen">
     <h1>VELOCE: STREET</h1>
-    <p>High-fidelity procedural physics, solid barriers, CarX Street dual pedals, and dynamic drift assist.</p>
+    <p>Arcade-realistic vehicle physics, 4-wheel raycast suspension, CarX drift assist, and 7 vehicle presets.</p>
     <div class="start-prompt">TAP OR CLICK TO RACE</div>
     <div class="controls-help-grid">
       <div class="help-card">
-        <b>CarX Mobile Layout</b>
+        <b>📱 CarX Mobile Layout</b>
         Left: ◀ and ▶ Steering Pedals<br>
         Right: GAS, BRAKE, DRIFT, NOS<br>
-        Multi-touch enabled<br>
-        Solid guardrails (no falling off)
+        Multi-touch proof (zero stuck inputs)<br>
+        Solid metallic guardrails
       </div>
       <div class="help-card">
-        <b>PC Desktop Layout</b>
+        <b>💻 PC Desktop Layout</b>
         WASD / Arrows: Steer & Drive<br>
         SPACE: Handbrake / Drift<br>
         SHIFT: Nitro Boost<br>
-        C: Camera | R: Quick Reset
+        P: Switch Presets | C: Cam | R: Reset
       </div>
     </div>
   </div>
@@ -493,6 +524,7 @@
       </div>
 
       <div class="top-controls">
+        <button class="hud-btn" id="btn-preset">🏎️ PRESET</button>
         <button class="hud-btn" id="btn-reset">🔄 RESET</button>
         <button class="hud-btn" id="btn-cam">📹 CAM</button>
         <button class="hud-btn" id="btn-color">🎨 COLOR</button>
@@ -501,7 +533,6 @@
     </div>
   </div>
 
-  <!-- CarX Street Mobile Touch Controls -->
   <div id="touch-controls">
     <div class="steer-cluster">
       <button class="steer-btn" id="btn-steer-left">
@@ -539,7 +570,442 @@
     import * as THREE from 'three';
 
     /* ======================================================================
-       1. SYNTH AUDIO (ENGINE, SQUEAL, NOS, BARRIER THUD)
+       STEP 3 CUSTOMIZATION: VEHICLE CONFIGURATION PRESETS
+       ====================================================================== */
+    const VEHICLE_PRESETS = {
+      streetRace: {
+        name: 'Street Race',
+        mass: 1300,
+        enginePower: 360,
+        staticFriction: 1.4,
+        dynamicFriction: 0.95,
+        driftFriction: 0.72,
+        suspensionK: 26000,
+        suspensionC: 2600,
+        suspensionRest: 0.45,
+        driftAssistStrength: 0.4,
+        driftThreshold: 0.15
+      },
+      sportsCar: {
+        name: 'Sports Car (GT)',
+        mass: 1100,
+        enginePower: 450,
+        staticFriction: 1.55,
+        dynamicFriction: 0.98,
+        driftFriction: 0.75,
+        suspensionK: 32000,
+        suspensionC: 3200,
+        suspensionRest: 0.40,
+        driftAssistStrength: 0.35,
+        driftThreshold: 0.13
+      },
+      driftKing: {
+        name: 'Drift King',
+        mass: 1180,
+        enginePower: 390,
+        staticFriction: 1.25,
+        dynamicFriction: 0.85,
+        driftFriction: 0.65,
+        suspensionK: 24000,
+        suspensionC: 2200,
+        suspensionRest: 0.42,
+        driftAssistStrength: 0.28,
+        driftThreshold: 0.10
+      },
+      truck: {
+        name: 'Heavy Truck',
+        mass: 2400,
+        enginePower: 300,
+        staticFriction: 1.2,
+        dynamicFriction: 0.9,
+        driftFriction: 0.65,
+        suspensionK: 20000,
+        suspensionC: 1900,
+        suspensionRest: 0.55,
+        driftAssistStrength: 0.6,
+        driftThreshold: 0.22
+      },
+      gripMonster: {
+        name: 'Grip Monster',
+        mass: 1380,
+        enginePower: 420,
+        staticFriction: 1.65,
+        dynamicFriction: 1.0,
+        driftFriction: 0.8,
+        suspensionK: 34000,
+        suspensionC: 3600,
+        suspensionRest: 0.42,
+        driftAssistStrength: 0.7,
+        driftThreshold: 0.25
+      },
+      offRoad: {
+        name: 'Off-Road 4x4',
+        mass: 1750,
+        enginePower: 330,
+        staticFriction: 1.3,
+        dynamicFriction: 0.92,
+        driftFriction: 0.7,
+        suspensionK: 18000,
+        suspensionC: 1700,
+        suspensionRest: 0.58,
+        driftAssistStrength: 0.5,
+        driftThreshold: 0.18
+      },
+      arcadeRacer: {
+        name: 'Arcade Ultra',
+        mass: 1200,
+        enginePower: 520,
+        staticFriction: 1.7,
+        dynamicFriction: 1.0,
+        driftFriction: 0.82,
+        suspensionK: 25000,
+        suspensionC: 2500,
+        suspensionRest: 0.44,
+        driftAssistStrength: 0.25,
+        driftThreshold: 0.14
+      }
+    };
+
+    const presetKeys = Object.keys(VEHICLE_PRESETS);
+    let currentPresetIndex = 0;
+
+    /* ======================================================================
+       STEP 2 PLAY: PRODUCTION VEHICLE PHYSICS ENGINE
+       ====================================================================== */
+    class VehiclePhysics {
+      constructor(vehicleRoot, chassisRoot, config = {}) {
+        this.vehicleRoot = vehicleRoot;
+        this.chassisRoot = chassisRoot;
+
+        this.velocity = new THREE.Vector3(0, 0, 0);
+        this.angularVelocity = new THREE.Vector3(0, 0, 0);
+        this.position = new THREE.Vector3(0, 0, 0);
+        this.yaw = 0;
+
+        this.currentGear = 1;
+        this.rpm = 0;
+        this.nitroFuel = 100;
+        this.nitroActive = false;
+
+        this.wheelHeights = [0, 0, 0, 0];
+        this.groundContact = false;
+
+        this.isDrifting = false;
+        this.driftAngle = 0;
+        this.driftPoints = 0;
+        this.driftMultiplier = 1.0;
+
+        this.wheelbase = 2.7;
+        this.trackWidth = 1.7;
+        this.wheelRadius = 0.35;
+        this.brakeTorque = 5500;
+        this.dragCoeff = 0.988;
+
+        this.nitroPowerMult = 1.9;
+        this.nitroTopSpeedMult = 1.45;
+
+        this.getGroundHeight = config.getGroundHeight || (() => 0);
+        this.getRoadOffset = config.getRoadOffset || (() => ({ x: 0, y: 0 }));
+        this.roadWidth = config.roadWidth || 14;
+
+        this.collisionEvents = [];
+        this.applyConfig(config);
+      }
+
+      applyConfig(config) {
+        this.mass = config.mass || 1300;
+        this.enginePower = config.enginePower || 360;
+        this.staticFriction = config.staticFriction || 1.4;
+        this.dynamicFriction = config.dynamicFriction || 0.95;
+        this.driftFriction = config.driftFriction || 0.72;
+        this.suspensionK = config.suspensionK || 26000;
+        this.suspensionC = config.suspensionC || 2600;
+        this.suspensionRest = config.suspensionRest || 0.45;
+        this.driftAssistStrength = config.driftAssistStrength || 0.4;
+        this.driftThreshold = config.driftThreshold || 0.15;
+      }
+
+      update(dt, inputs = {}) {
+        const { throttle = 0, steering = 0, handbrake = false, nos = false } = inputs;
+        const th = Math.max(-1, Math.min(1, throttle));
+        const st = Math.max(-1, Math.min(1, steering));
+
+        this.updateGroundContact();
+        this.applySuspension(dt);
+        this.applyGravity(dt);
+        this.updateDrivetrain(th, nos, dt);
+        this.updateTraction(th, st, handbrake, dt);
+        this.updateDrift(st, handbrake, dt);
+        this.updateSteering(st, handbrake, dt);
+        this.updateWeightTransfer(th, st, dt);
+        this.updatePosition(dt);
+        this.checkRoadBoundaries();
+        this.syncToThreeJS();
+      }
+
+      updateGroundContact() {
+        const cosY = Math.cos(this.yaw);
+        const sinY = Math.sin(this.yaw);
+
+        const wheelOffsets = [
+          [-this.trackWidth * 0.5, this.wheelbase * 0.5],
+          [this.trackWidth * 0.5, this.wheelbase * 0.5],
+          [-this.trackWidth * 0.5, -this.wheelbase * 0.5],
+          [this.trackWidth * 0.5, -this.wheelbase * 0.5]
+        ];
+
+        let minH = Infinity;
+        let contacts = 0;
+
+        for (let i = 0; i < 4; i++) {
+          const [ox, oz] = wheelOffsets[i];
+          const wx = this.position.x + ox * cosY + oz * sinY;
+          const wz = this.position.z - ox * sinY + oz * cosY;
+
+          const gY = this.getGroundHeight(wx, wz);
+          this.wheelHeights[i] = gY;
+          if (this.position.y - gY < this.suspensionRest + 0.15) {
+            contacts++;
+          }
+          minH = Math.min(minH, gY);
+        }
+
+        this.groundContact = contacts >= 2;
+        const targetMinRide = minH + 0.35;
+        if (this.position.y < targetMinRide) {
+          this.position.y = targetMinRide;
+          if (this.velocity.y < 0) this.velocity.y = 0;
+        }
+      }
+
+      applySuspension(dt) {
+        if (!this.groundContact) return;
+
+        let totalSpringForce = 0;
+        for (let i = 0; i < 4; i++) {
+          const gY = this.wheelHeights[i];
+          const currentHeight = this.position.y - gY;
+          // Compression is positive when chassis drops below rest height
+          const compression = Math.max(0, this.suspensionRest - currentHeight);
+
+          const springForce = this.suspensionK * compression;
+          const damperForce = -this.suspensionC * this.velocity.y;
+          const netWheelForce = Math.max(0, springForce + damperForce);
+          totalSpringForce += netWheelForce;
+        }
+
+        const accelY = (totalSpringForce / this.mass) - 9.81;
+        this.velocity.y += accelY * dt;
+      }
+
+      applyGravity(dt) {
+        if (!this.groundContact) {
+          this.velocity.y -= 30.0 * dt;
+        }
+      }
+
+      updateDrivetrain(throttle, nos, dt) {
+        const speed = this.velocity.length();
+        const maxSpeed = 72; // m/s (~260 km/h)
+        const forwardRatio = Math.min(1.0, speed / maxSpeed);
+
+        if (this.velocity.dot(new THREE.Vector3(Math.sin(this.yaw), 0, Math.cos(this.yaw))) < -0.1) {
+          this.currentGear = 'REV';
+        } else if (forwardRatio < 0.20) this.currentGear = '1ST';
+        else if (forwardRatio < 0.42) this.currentGear = '2ND';
+        else if (forwardRatio < 0.65) this.currentGear = '3RD';
+        else if (forwardRatio < 0.88) this.currentGear = '4TH';
+        else this.currentGear = '5TH';
+
+        const gearCycle = (forwardRatio * 4.5) % 1.0;
+        this.rpm = Math.min(7500, 1000 + (throttle !== 0 ? gearCycle * 6500 : gearCycle * 2500));
+
+        if (nos && this.nitroFuel > 2 && throttle > 0) {
+          this.nitroActive = true;
+          this.nitroFuel = Math.max(0, this.nitroFuel - 34 * dt);
+        } else {
+          this.nitroActive = false;
+          this.nitroFuel = Math.min(100, this.nitroFuel + 12 * dt);
+        }
+      }
+
+      updateTraction(throttle, steering, handbrake, dt) {
+        const speed = this.velocity.length();
+        const maxSpeed = this.nitroActive ? 72 * this.nitroTopSpeedMult : 72;
+
+        let tractionForce = 0;
+        if (this.groundContact) {
+          if (this.currentGear === 'REV' || (throttle < 0 && speed < 1.0)) {
+            const maxRevTraction = this.mass * 9.81 * this.staticFriction * 0.6;
+            tractionForce = -(this.enginePower * 1000 * Math.abs(throttle)) / Math.max(2, speed);
+            tractionForce = Math.max(-maxRevTraction, tractionForce);
+          } else if (throttle > 0) {
+            const maxTraction = this.mass * 9.81 * this.staticFriction;
+            const boost = this.nitroActive ? this.nitroPowerMult : 1.0;
+            tractionForce = (this.enginePower * 1000 * throttle * boost) / Math.max(2, speed);
+            tractionForce = Math.min(maxTraction, tractionForce);
+          } else if (throttle < 0) {
+            tractionForce = -Math.min(speed * this.mass * 2.5, this.brakeTorque / this.wheelRadius);
+          }
+        }
+
+        let dragForce = speed * speed * 0.35 + speed * 15;
+        if (handbrake) {
+          dragForce += (this.brakeTorque / this.wheelRadius) * 0.5;
+        }
+
+        const netForce = tractionForce - Math.sign(speed) * dragForce;
+        const accel = netForce / this.mass;
+
+        const forward = new THREE.Vector3(Math.sin(this.yaw), 0, Math.cos(this.yaw));
+        this.velocity.add(forward.multiplyScalar(accel * dt));
+
+        if (this.velocity.length() > maxSpeed) {
+          this.velocity.normalize().multiplyScalar(maxSpeed);
+        }
+      }
+
+      updateDrift(steering, handbrake, dt) {
+        const speed = this.velocity.length();
+        const forward = new THREE.Vector3(Math.sin(this.yaw), 0, Math.cos(this.yaw));
+        const sideways = new THREE.Vector3(Math.cos(this.yaw), 0, -Math.sin(this.yaw));
+
+        const lateralVel = this.velocity.dot(sideways);
+        const forwardVel = this.velocity.dot(forward);
+        this.driftAngle = Math.atan2(lateralVel, Math.max(0.5, Math.abs(forwardVel)));
+
+        const slipTrigger = Math.abs(this.driftAngle) > this.driftThreshold;
+        const speedTrigger = speed > 6.0;
+
+        if ((slipTrigger && speedTrigger) || (handbrake && speed > 5.0 && Math.abs(steering) > 0.1)) {
+          this.isDrifting = true;
+          this.driftMultiplier = Math.min(5.0, this.driftMultiplier + dt * 0.85);
+          const intensity = Math.abs(this.driftAngle) * speed * 25;
+          this.driftPoints += Math.floor(intensity * this.driftMultiplier);
+
+          const counterTorque = -this.driftAngle * this.driftAssistStrength * 2.2;
+          this.angularVelocity.y += counterTorque * dt;
+        } else {
+          this.isDrifting = false;
+          this.driftMultiplier = 1.0;
+        }
+      }
+
+      updateSteering(steering, handbrake, dt) {
+        const speed = this.velocity.length();
+        const maxSteerAngle = 0.55;
+        const speedDamp = Math.max(0.35, 1 - speed / 90);
+        const steerAngle = steering * maxSteerAngle * speedDamp;
+
+        const forward = new THREE.Vector3(Math.sin(this.yaw), 0, Math.cos(this.yaw));
+        const forwardSpeed = this.velocity.dot(forward);
+
+        const targetYawRate = (forwardSpeed / this.wheelbase) * Math.tan(steerAngle);
+        const handbrakeBonus = handbrake ? 1.6 : 1.0;
+
+        this.angularVelocity.y = THREE.MathUtils.lerp(
+          this.angularVelocity.y,
+          targetYawRate * handbrakeBonus,
+          0.26
+        );
+
+        this.yaw += this.angularVelocity.y * dt;
+
+        const grip = this.isDrifting ? this.driftFriction : this.staticFriction;
+        const blendFactor = Math.min(0.22, (grip * 1.5) * dt * (speed / 15));
+        const targetVelocity = forward.multiplyScalar(forwardSpeed);
+        this.velocity.lerp(targetVelocity, blendFactor);
+      }
+
+      updateWeightTransfer(throttle, steering, dt) {
+        const speed = this.velocity.length();
+        const speedRatio = Math.min(1.0, speed / 50);
+
+        const spineAhead = this.getRoadOffset(this.position.z + 5);
+        const spineBehind = this.getRoadOffset(this.position.z - 5);
+        const roadPitch = Math.atan2(spineAhead.y - spineBehind.y, 10);
+
+        const accelPitch = (throttle > 0 ? -0.05 : (throttle < 0 ? 0.09 : 0.0)) * speedRatio;
+        this.chassisRoot.rotation.x = THREE.MathUtils.lerp(
+          this.chassisRoot.rotation.x,
+          roadPitch + accelPitch,
+          0.22
+        );
+
+        const bodyRoll = steering * 0.07 * speedRatio;
+        this.chassisRoot.rotation.z = THREE.MathUtils.lerp(
+          this.chassisRoot.rotation.z,
+          bodyRoll,
+          0.22
+        );
+
+        const driftYawOffset = this.isDrifting ? -steering * 0.45 : 0;
+        this.chassisRoot.rotation.y = THREE.MathUtils.lerp(
+          this.chassisRoot.rotation.y,
+          driftYawOffset,
+          0.18
+        );
+      }
+
+      updatePosition(dt) {
+        this.position.add(this.velocity.clone().multiplyScalar(dt));
+      }
+
+      checkRoadBoundaries() {
+        const spine = this.getRoadOffset(this.position.z);
+        const halfWidth = this.roadWidth * 0.5 - 1.25;
+        const dx = this.position.x - spine.x;
+
+        if (dx > halfWidth) {
+          this.position.x = spine.x + halfWidth;
+          this.velocity.x = -Math.abs(this.velocity.x) * 0.35;
+          this.velocity.multiplyScalar(0.88);
+          this.collisionEvents.push({ side: 'right', pos: this.position.clone() });
+        } else if (dx < -halfWidth) {
+          this.position.x = spine.x - halfWidth;
+          this.velocity.x = Math.abs(this.velocity.x) * 0.35;
+          this.velocity.multiplyScalar(0.88);
+          this.collisionEvents.push({ side: 'left', pos: this.position.clone() });
+        }
+      }
+
+      syncToThreeJS() {
+        this.vehicleRoot.position.copy(this.position);
+        this.vehicleRoot.rotation.y = this.yaw;
+      }
+
+      getTelemetry() {
+        const speed = this.velocity.length();
+        return {
+          speedKmh: Math.round(speed * 3.6),
+          rpmRatio: Math.min(1.0, this.rpm / 7500),
+          gear: this.currentGear,
+          nitroFuel: Math.round(this.nitroFuel),
+          nitroActive: this.nitroActive,
+          isDrifting: this.isDrifting,
+          driftPoints: this.driftPoints,
+          driftMultiplier: this.driftMultiplier.toFixed(1),
+          collisions: this.collisionEvents.splice(0)
+        };
+      }
+
+      reset(x = 0, y = 0.5, z = 0, yaw = 0) {
+        this.position.set(x, y, z);
+        this.velocity.set(0, 0, 0);
+        this.angularVelocity.set(0, 0, 0);
+        this.yaw = yaw;
+        this.currentGear = '1ST';
+        this.rpm = 1000;
+        this.isDrifting = false;
+        this.nitroFuel = 100;
+        this.vehicleRoot.position.copy(this.position);
+        this.vehicleRoot.rotation.set(0, yaw, 0);
+        this.chassisRoot.rotation.set(0, 0, 0);
+      }
+    }
+
+    /* ======================================================================
+       PROCEDURAL WEB AUDIO SYNTHESIZER
        ====================================================================== */
     class SoundEngine {
       constructor() {
@@ -567,11 +1033,11 @@
 
         this.oscSaw = this.ctx.createOscillator();
         this.oscSaw.type = 'sawtooth';
-        this.oscSaw.frequency.setValueAtTime(40, this.ctx.currentTime);
+        this.oscSaw.frequency.setValueAtTime(42, this.ctx.currentTime);
 
         this.oscSub = this.ctx.createOscillator();
         this.oscSub.type = 'triangle';
-        this.oscSub.frequency.setValueAtTime(20, this.ctx.currentTime);
+        this.oscSub.frequency.setValueAtTime(21, this.ctx.currentTime);
 
         this.oscSaw.connect(this.filter);
         this.oscSub.connect(this.filter);
@@ -606,7 +1072,7 @@
         this.nosGain.gain.setValueAtTime(0.0, this.ctx.currentTime);
         this.nosOsc = this.ctx.createOscillator();
         this.nosOsc.type = 'sawtooth';
-        this.nosOsc.frequency.setValueAtTime(300, this.ctx.currentTime);
+        this.nosOsc.frequency.setValueAtTime(280, this.ctx.currentTime);
         this.nosFilter = this.ctx.createBiquadFilter();
         this.nosFilter.type = 'highpass';
         this.nosFilter.frequency.setValueAtTime(750, this.ctx.currentTime);
@@ -639,7 +1105,7 @@
         if (!this.initialized || !this.enabled || this.ctx.state !== 'running') return;
         const osc = this.ctx.createOscillator();
         const g = this.ctx.createGain();
-        osc.frequency.setValueAtTime(90, this.ctx.currentTime);
+        osc.frequency.setValueAtTime(95, this.ctx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.15);
         g.gain.setValueAtTime(0.2, this.ctx.currentTime);
         g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
@@ -665,7 +1131,7 @@
     const audio = new SoundEngine();
 
     /* ======================================================================
-       2. THREE.JS RENDERER & SCENE
+       THREE.JS SETUP & ATMOSPHERE
        ====================================================================== */
     const canvas = document.getElementById('game-canvas');
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
@@ -704,7 +1170,7 @@
     scene.add(infiniteGround);
 
     /* ======================================================================
-       3. ROADWAY, TERRAIN, & SOLID BARRIERS
+       ROADWAY, TERRAIN, & METALLIC GUARDRAILS
        ====================================================================== */
     const ROAD_WIDTH = 14;
     const CHUNK_LENGTH = 160;
@@ -883,7 +1349,7 @@
 
           rightVerts.push(
             rxA, ryA_bot, zA,  rxA, ryA_top, zA,  rxB, ryB_bot, zB,
-            rxA, ryA_top, zA,  rxB, ryB_top, zB,  rxB, ryB_bot, zB
+            rxA, ryA_top, zA,  rxB, ryB_bot, zB,  rxB, ryB_top, zB
           );
         }
 
@@ -921,14 +1387,14 @@
     }
 
     /* ======================================================================
-       4. CARX VEHICLE
+       PROCEDURAL SPORTS CAR VISUALS
        ====================================================================== */
-    const carColors = [0xef4444, 0x10b981, 0x3b82f6, 0xf59e0b, 0x8b5cf6, 0xec4899, 0xf8fafc];
-    let currentColorIndex = 1;
+    const carColors = [0x10b981, 0xef4444, 0x3b82f6, 0xf59e0b, 0x8b5cf6, 0xec4899, 0xf8fafc];
+    let currentColorIndex = 0;
 
-    const car = new THREE.Group();
-    const chassis = new THREE.Group();
-    car.add(chassis);
+    const carRoot = new THREE.Group();
+    const chassisRoot = new THREE.Group();
+    carRoot.add(chassisRoot);
 
     const bodyMat = new THREE.MeshStandardMaterial({
       color: carColors[currentColorIndex],
@@ -938,41 +1404,42 @@
     const bodyMesh = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.65, 4.4), bodyMat);
     bodyMesh.position.y = 0.55;
     bodyMesh.castShadow = true;
-    chassis.add(bodyMesh);
+    chassisRoot.add(bodyMesh);
 
     const cabinMat = new THREE.MeshStandardMaterial({ color: 0x05070a, metalness: 0.95, roughness: 0.05 });
     const cabinMesh = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.55, 2.2), cabinMat);
     cabinMesh.position.set(0, 1.05, -0.3);
-    chassis.add(cabinMesh);
+    cabinMesh.castShadow = true;
+    chassisRoot.add(cabinMesh);
 
     const spoilerBar = new THREE.Mesh(
       new THREE.BoxGeometry(2.2, 0.08, 0.4),
       new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.3 })
     );
     spoilerBar.position.set(0, 1.25, -2.0);
-    chassis.add(spoilerBar);
+    chassisRoot.add(spoilerBar);
 
     const headLightMesh = new THREE.Mesh(
       new THREE.BoxGeometry(0.35, 0.15, 0.1),
       new THREE.MeshBasicMaterial({ color: 0xffffff })
     );
     headLightMesh.position.set(0.7, 0.55, 2.22);
-    chassis.add(headLightMesh);
+    chassisRoot.add(headLightMesh);
     const headLightMeshL = headLightMesh.clone();
     headLightMeshL.position.x = -0.7;
-    chassis.add(headLightMeshL);
+    chassisRoot.add(headLightMeshL);
 
     const tailLightMat = new THREE.MeshBasicMaterial({ color: 0xff1122 });
     const tailLightR = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.15, 0.1), tailLightMat);
     tailLightR.position.set(0.7, 0.6, -2.22);
-    chassis.add(tailLightR);
+    chassisRoot.add(tailLightR);
     const tailLightL = tailLightR.clone();
     tailLightL.position.x = -0.7;
-    chassis.add(tailLightL);
+    chassisRoot.add(tailLightL);
 
     const underglowLight = new THREE.PointLight(0x00f0ff, 2.5, 8);
     underglowLight.position.set(0, 0.2, 0);
-    chassis.add(underglowLight);
+    chassisRoot.add(underglowLight);
 
     const wheelMeshes = [];
     const wheelGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.35, 18);
@@ -999,7 +1466,7 @@
       rim.rotateZ(Math.PI / 2);
       holder.add(rim);
 
-      chassis.add(holder);
+      chassisRoot.add(holder);
       wheelMeshes.push({ holder, mesh: wMesh, front: pos.front });
     });
 
@@ -1012,19 +1479,26 @@
     scene.add(sparkPoints);
     let sparkIdx = 0;
 
-    scene.add(car);
+    scene.add(carRoot);
+
+    const physics = new VehiclePhysics(carRoot, chassisRoot, {
+      ...VEHICLE_PRESETS.streetRace,
+      getGroundHeight,
+      getRoadOffset,
+      roadWidth: ROAD_WIDTH
+    });
 
     const initSpine = getRoadOffset(0);
-    car.position.set(initSpine.x, initSpine.y + 0.48, 0);
+    physics.reset(initSpine.x, initSpine.y + 0.5, 0, 0);
 
     /* ======================================================================
-       5. CARX TOUCH & KEYBOARD INPUT ENGINE
+       INPUT ENGINE (CARX ARROW BUTTONS + KEYBOARD + GAMEPAD)
        ====================================================================== */
-    const input = {
+    const inputState = {
       steerTarget: 0,
       currentSteer: 0,
       throttle: 0,
-      drift: false,
+      handbrake: false,
       nos: false
     };
 
@@ -1036,10 +1510,11 @@
       if (k === 'd' || k === 'arrowright') keyRight = true;
       if (k === 'w' || k === 'arrowup') keyGas = true;
       if (k === 's' || k === 'arrowdown') keyBrake = true;
-      if (k === ' ') input.drift = true;
-      if (k === 'shift') input.nos = true;
-      if (k === 'r') resetCarToRoad();
+      if (k === ' ') inputState.handbrake = true;
+      if (k === 'shift') inputState.nos = true;
+      if (k === 'r') resetCar();
       if (k === 'c') toggleCamera();
+      if (k === 'p') cyclePreset();
       audio.init();
     });
 
@@ -1049,11 +1524,11 @@
       if (k === 'd' || k === 'arrowright') keyRight = false;
       if (k === 'w' || k === 'arrowup') keyGas = false;
       if (k === 's' || k === 'arrowdown') keyBrake = false;
-      if (k === ' ') input.drift = false;
-      if (k === 'shift') input.nos = false;
+      if (k === ' ') inputState.handbrake = false;
+      if (k === 'shift') inputState.nos = false;
     });
 
-    function setupTouchButton(id, onState) {
+    function bindTouchAction(id, onState) {
       const el = document.getElementById(id);
       let pId = null;
 
@@ -1067,7 +1542,7 @@
         onState(true);
       });
 
-      const endAction = (e) => {
+      const release = (e) => {
         if (e.pointerId === pId) {
           pId = null;
           el.classList.remove('active');
@@ -1076,24 +1551,55 @@
         }
       };
 
-      el.addEventListener('pointerup', endAction);
-      el.addEventListener('pointercancel', endAction);
-      el.addEventListener('pointerleave', endAction);
+      el.addEventListener('pointerup', release);
+      el.addEventListener('pointercancel', release);
+      el.addEventListener('pointerleave', release);
     }
 
     let touchLeft = false, touchRight = false, touchGas = false, touchBrake = false;
 
-    setupTouchButton('btn-steer-left', (down) => { touchLeft = down; });
-    setupTouchButton('btn-steer-right', (down) => { touchRight = down; });
-    setupTouchButton('btn-gas', (down) => { touchGas = down; });
-    setupTouchButton('btn-brake', (down) => { touchBrake = down; });
-    setupTouchButton('btn-drift', (down) => {
-      input.drift = down;
-      if (down && navigator.vibrate) navigator.vibrate(15);
+    bindTouchAction('btn-steer-left', (val) => { touchLeft = val; });
+    bindTouchAction('btn-steer-right', (val) => { touchRight = val; });
+    bindTouchAction('btn-gas', (val) => { touchGas = val; });
+    bindTouchAction('btn-brake', (val) => { touchBrake = val; });
+    bindTouchAction('btn-drift', (val) => {
+      inputState.handbrake = val;
+      if (val && navigator.vibrate) navigator.vibrate(15);
     });
-    setupTouchButton('btn-nos', (down) => { input.nos = down; });
+    bindTouchAction('btn-nos', (val) => { inputState.nos = val; });
 
-    document.getElementById('btn-reset').addEventListener('click', resetCarToRoad);
+    const toast = document.getElementById('toast');
+    let toastTimer = null;
+    function showToast(msg) {
+      toast.innerText = msg;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+    }
+
+    function cyclePreset() {
+      currentPresetIndex = (currentPresetIndex + 1) % presetKeys.length;
+      const presetKey = presetKeys[currentPresetIndex];
+      const preset = VEHICLE_PRESETS[presetKey];
+      physics.applyConfig(preset);
+      showToast(`PRESET: ${preset.name.toUpperCase()}`);
+    }
+
+    function resetCar() {
+      const spine = getRoadOffset(physics.position.z);
+      const nextSpine = getRoadOffset(physics.position.z + 6);
+      const angle = Math.atan2(nextSpine.x - spine.x, 6);
+      physics.reset(spine.x, spine.y + 0.5, physics.position.z, angle);
+      showToast('RECOVERED TO ROAD');
+    }
+
+    let cameraMode = 0;
+    function toggleCamera() {
+      cameraMode = (cameraMode + 1) % 3;
+    }
+
+    document.getElementById('btn-preset').addEventListener('click', cyclePreset);
+    document.getElementById('btn-reset').addEventListener('click', resetCar);
     document.getElementById('btn-cam').addEventListener('click', toggleCamera);
     document.getElementById('btn-color').addEventListener('click', () => {
       currentColorIndex = (currentColorIndex + 1) % carColors.length;
@@ -1110,62 +1616,35 @@
       audio.init();
     });
 
-    function resetCarToRoad() {
-      const spine = getRoadOffset(car.position.z);
-      car.position.x = spine.x;
-      car.position.y = spine.y + 0.48;
-      speed = 0;
-      velocityY = 0;
-      driftAngle = 0;
-      const nextSpine = getRoadOffset(car.position.z + 6);
-      const angle = Math.atan2(nextSpine.x - spine.x, 6);
-      car.rotation.set(0, angle, 0);
-      chassis.rotation.set(0, 0, 0);
-    }
-
-    /* ======================================================================
-       6. CARX STREET HQ PHYSICS ENGINE
-       ====================================================================== */
-    let speed = 0;
-    let velocityY = 0;
-    let nosFuel = 100;
-    let driftAngle = 0;
-    let driftScore = 0;
-    let totalScore = 0;
-    let driftMultiplier = 1.0;
-    let currentGear = '1ST';
-
-    const TOP_SPEED = 1.85;
-    const ACCEL_RATE = 0.025;
-    const BRAKE_RATE = 0.045;
-    const DRAG_COEFF = 0.988;
-    const STEER_RATE = 0.042;
-    const GRAVITY = 34.0;
-    const RIDE_HEIGHT = 0.48;
-    const CAR_HALF_WIDTH = 1.25;
-
-    let cameraMode = 0;
-    function toggleCamera() {
-      cameraMode = (cameraMode + 1) % 3;
-    }
-
     function pollInputs() {
       let l = keyLeft || touchLeft;
       let r = keyRight || touchRight;
       let g = keyGas || touchGas;
       let b = keyBrake || touchBrake;
 
+      const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+      if (gamepads && gamepads[0]) {
+        const gp = gamepads[0];
+        if (Math.abs(gp.axes[0]) > 0.15) {
+          if (gp.axes[0] < -0.15) l = true;
+          if (gp.axes[0] > 0.15) r = true;
+        }
+        if (gp.buttons && gp.buttons.value > 0.1) g = true;
+        if (gp.buttons && gp.buttons.value > 0.1) b = true;
+        if (gp.buttons[0] && gp.buttons[0].pressed) inputState.handbrake = true;
+        if (gp.buttons && gp.buttons.pressed) inputState.nos = true;
+      }
+
       let rawSteer = 0;
       if (l) rawSteer -= 1;
       if (r) rawSteer += 1;
-      input.steerTarget = rawSteer;
-      input.currentSteer = THREE.MathUtils.lerp(input.currentSteer, input.steerTarget, 0.28);
-
-      input.throttle = (g ? 1 : 0) - (b ? 1 : 0);
+      inputState.steerTarget = rawSteer;
+      inputState.currentSteer = THREE.MathUtils.lerp(inputState.currentSteer, inputState.steerTarget, 0.28);
+      inputState.throttle = (g ? 1 : 0) - (b ? 1 : 0);
     }
 
     /* ======================================================================
-       7. MAIN ANIMATION & RENDERING LOOP
+       MAIN ANIMATION & TELEMETRY SYNC LOOP
        ====================================================================== */
     const hudSpeed = document.getElementById('hud-speed');
     const hudGear = document.getElementById('hud-gear');
@@ -1185,140 +1664,36 @@
 
       pollInputs();
 
-      let currentTopSpeed = TOP_SPEED;
-      let isNosActive = false;
-      if (input.nos && nosFuel > 2 && input.throttle > 0) {
-        isNosActive = true;
-        currentTopSpeed *= 1.45;
-        speed += ACCEL_RATE * 1.9;
-        nosFuel = Math.max(0, nosFuel - dt * 36);
-      } else {
-        nosFuel = Math.min(100, nosFuel + dt * 10);
-      }
-
-      if (input.throttle > 0) {
-        speed = Math.min(speed + ACCEL_RATE, currentTopSpeed);
-      } else if (input.throttle < 0) {
-        speed = Math.max(speed - BRAKE_RATE, -TOP_SPEED * 0.4);
-      } else {
-        speed *= DRAG_COEFF;
-      }
-
-      const forwardRatio = Math.max(0, speed / TOP_SPEED);
-      if (speed < -0.05) currentGear = 'REV';
-      else if (forwardRatio < 0.2) currentGear = '1ST';
-      else if (forwardRatio < 0.42) currentGear = '2ND';
-      else if (forwardRatio < 0.65) currentGear = '3RD';
-      else if (forwardRatio < 0.88) currentGear = '4TH';
-      else currentGear = '5TH';
-
-      const gearRpm = (forwardRatio * 4) % 1.0;
-      const rpmDisplay = Math.min(1.0, 0.15 + (input.throttle > 0 ? gearRpm * 0.85 : gearRpm * 0.4));
-
-      const speedNorm = Math.min(1.0, Math.abs(speed) / (TOP_SPEED * 0.35));
-      const isDrifting = input.drift && Math.abs(speed) > 0.4 && Math.abs(input.currentSteer) > 0.2;
-
-      if (isDrifting) {
-        const driftTarget = -input.currentSteer * 0.6;
-        driftAngle = THREE.MathUtils.lerp(driftAngle, driftTarget, 0.15);
-      } else {
-        driftAngle = THREE.MathUtils.lerp(driftAngle, 0, 0.2);
-      }
-
-      const driftTurnBonus = isDrifting ? 1.8 : 1.0;
-      car.rotation.y += input.currentSteer * STEER_RATE * speedNorm * driftTurnBonus;
-      chassis.rotation.y = driftAngle;
-
-      wheelMeshes.forEach((w) => {
-        if (w.front) w.holder.rotation.y = input.currentSteer * 0.48;
-        w.mesh.rotation.x += speed * 0.65;
+      physics.update(dt, {
+        throttle: inputState.throttle,
+        steering: inputState.currentSteer,
+        handbrake: inputState.handbrake,
+        nos: inputState.nos
       });
 
-      car.translateZ(speed * dt * 60);
+      const telem = physics.getTelemetry();
 
-      // Guardrail Barrier Collision
-      const spine = getRoadOffset(car.position.z);
-      const halfTrack = ROAD_WIDTH * 0.5 - CAR_HALF_WIDTH;
-      const distFromCenter = car.position.x - spine.x;
-
-      if (distFromCenter > halfTrack) {
-        car.position.x = spine.x + halfTrack;
-        speed *= 0.86;
+      if (telem.collisions.length > 0) {
         audio.playThud();
         if (navigator.vibrate) navigator.vibrate(25);
 
-        const pos = sparkPoints.geometry.attributes.position.array;
-        const pIdx = (sparkIdx % SPARK_COUNT) * 3;
-        pos[pIdx] = car.position.x + 1.1;
-        pos[pIdx + 1] = car.position.y + 0.3 + Math.random() * 0.3;
-        pos[pIdx + 2] = car.position.z + (Math.random() - 0.5) * 1.5;
-        sparkPoints.geometry.attributes.position.needsUpdate = true;
-        sparkIdx++;
-      } else if (distFromCenter < -halfTrack) {
-        car.position.x = spine.x - halfTrack;
-        speed *= 0.86;
-        audio.playThud();
-        if (navigator.vibrate) navigator.vibrate(25);
-
-        const pos = sparkPoints.geometry.attributes.position.array;
-        const pIdx = (sparkIdx % SPARK_COUNT) * 3;
-        pos[pIdx] = car.position.x - 1.1;
-        pos[pIdx + 1] = car.position.y + 0.3 + Math.random() * 0.3;
-        pos[pIdx + 2] = car.position.z + (Math.random() - 0.5) * 1.5;
-        sparkPoints.geometry.attributes.position.needsUpdate = true;
-        sparkIdx++;
+        telem.collisions.forEach((c) => {
+          const pos = sparkPoints.geometry.attributes.position.array;
+          const pIdx = (sparkIdx % SPARK_COUNT) * 3;
+          pos[pIdx] = c.pos.x + (c.side === 'right' ? 1.1 : -1.1);
+          pos[pIdx + 1] = c.pos.y + 0.35 + Math.random() * 0.3;
+          pos[pIdx + 2] = c.pos.z + (Math.random() - 0.5) * 1.5;
+          sparkPoints.geometry.attributes.position.needsUpdate = true;
+          sparkIdx++;
+        });
       }
 
-      // Ground Elevation & Spring Suspension
-      const groundY = getGroundHeight(car.position.x, car.position.z);
-      const targetRideY = groundY + RIDE_HEIGHT;
+      wheelMeshes.forEach((w) => {
+        if (w.front) w.holder.rotation.y = inputState.currentSteer * 0.48;
+        w.mesh.rotation.x += (telem.speedKmh / 3.6) * dt * 3.0;
+      });
 
-      if (car.position.y > targetRideY + 0.02) {
-        velocityY -= GRAVITY * dt;
-        car.position.y += velocityY * dt;
-        if (car.position.y <= targetRideY) {
-          car.position.y = targetRideY;
-          velocityY = 0;
-        }
-      } else {
-        velocityY = 0;
-        car.position.y = THREE.MathUtils.lerp(car.position.y, targetRideY, 0.4);
-      }
-
-      // Inertia Body Tilt
-      const forwardHX = Math.sin(car.rotation.y);
-      const forwardHZ = Math.cos(car.rotation.y);
-
-      const frontH = getGroundHeight(car.position.x + forwardHX * 2.0, car.position.z + forwardHZ * 2.0);
-      const rearH = getGroundHeight(car.position.x - forwardHX * 2.0, car.position.z - forwardHZ * 2.0);
-      const roadSlopePitch = Math.atan2(frontH - rearH, 4.0);
-
-      const accelPitch = (input.throttle > 0 ? -0.04 : (input.throttle < 0 ? 0.08 : 0.0)) * forwardRatio;
-      chassis.rotation.x = THREE.MathUtils.lerp(chassis.rotation.x, roadSlopePitch + accelPitch, 0.22);
-
-      const bodyRollTarget = input.currentSteer * 0.06 * forwardRatio;
-      chassis.rotation.z = THREE.MathUtils.lerp(chassis.rotation.z, bodyRollTarget, 0.22);
-
-      // Drift Scoring
-      if (isDrifting) {
-        driftMultiplier = Math.min(5.0, driftMultiplier + dt * 0.9);
-        const added = Math.floor(Math.abs(speed) * 95 * driftMultiplier);
-        driftScore += added;
-        totalScore += added;
-
-        hudDriftBanner.classList.add('active');
-        hudDriftScore.innerText = `+${driftScore} DRIFT`;
-        hudDriftCombo.innerText = `${driftMultiplier.toFixed(1)}x MULTIPLIER`;
-      } else {
-        if (driftScore > 0) {
-          driftScore = 0;
-          driftMultiplier = 1.0;
-          hudDriftBanner.classList.remove('active');
-        }
-      }
-
-      // Chunk Recycling Window
-      const currentChunkIdx = Math.floor(car.position.z / CHUNK_LENGTH);
+      const currentChunkIdx = Math.floor(physics.position.z / CHUNK_LENGTH);
       const minRequiredZ = (currentChunkIdx - 1) * CHUNK_LENGTH;
       const maxRequiredZ = (currentChunkIdx + NUM_CHUNKS - 2) * CHUNK_LENGTH;
 
@@ -1332,62 +1707,68 @@
         }
       });
 
-      infiniteGround.position.set(car.position.x, -1.0, car.position.z);
-      dirLight.position.set(car.position.x + 40, car.position.y + 80, car.position.z + 40);
-      dirLight.target.position.copy(car.position);
+      infiniteGround.position.set(physics.position.x, -1.0, physics.position.z);
+      dirLight.position.set(physics.position.x + 40, physics.position.y + 80, physics.position.z + 40);
+      dirLight.target.position.copy(physics.position);
 
-      // Camera Follow
       const camLerp = 0.14;
       let targetCam;
       if (cameraMode === 0) {
-        const fovBoost = isNosActive ? 74 : 60;
+        const fovBoost = telem.nitroActive ? 74 : 60;
         camera.fov = THREE.MathUtils.lerp(camera.fov, fovBoost, 0.1);
         camera.updateProjectionMatrix();
 
         targetCam = new THREE.Vector3(
-          car.position.x - Math.sin(car.rotation.y) * 8.6,
-          car.position.y + 3.6,
-          car.position.z - Math.cos(car.rotation.y) * 8.6
+          physics.position.x - Math.sin(physics.yaw) * 8.6,
+          physics.position.y + 3.6,
+          physics.position.z - Math.cos(physics.yaw) * 8.6
         );
         camera.position.lerp(targetCam, camLerp);
         camera.lookAt(
-          car.position.x + Math.sin(car.rotation.y) * 4.5,
-          car.position.y + 1.1,
-          car.position.z + Math.cos(car.rotation.y) * 4.5
+          physics.position.x + Math.sin(physics.yaw) * 4.5,
+          physics.position.y + 1.1,
+          physics.position.z + Math.cos(physics.yaw) * 4.5
         );
       } else if (cameraMode === 1) {
         targetCam = new THREE.Vector3(
-          car.position.x + Math.sin(car.rotation.y) * 0.6,
-          car.position.y + 1.35,
-          car.position.z + Math.cos(car.rotation.y) * 0.6
+          physics.position.x + Math.sin(physics.yaw) * 0.6,
+          physics.position.y + 1.35,
+          physics.position.z + Math.cos(physics.yaw) * 0.6
         );
         camera.position.copy(targetCam);
         camera.lookAt(
-          car.position.x + Math.sin(car.rotation.y) * 30,
-          car.position.y + 1.0,
-          car.position.z + Math.cos(car.rotation.y) * 30
+          physics.position.x + Math.sin(physics.yaw) * 30,
+          physics.position.y + 1.0,
+          physics.position.z + Math.cos(physics.yaw) * 30
         );
       } else {
         targetCam = new THREE.Vector3(
-          car.position.x - Math.sin(car.rotation.y) * 5.4,
-          car.position.y + 2.0,
-          car.position.z - Math.cos(car.rotation.y) * 5.4
+          physics.position.x - Math.sin(physics.yaw) * 5.4,
+          physics.position.y + 2.0,
+          physics.position.z - Math.cos(physics.yaw) * 5.4
         );
         camera.position.lerp(targetCam, camLerp);
         camera.lookAt(
-          car.position.x + Math.sin(car.rotation.y) * 5,
-          car.position.y + 0.8,
-          car.position.z + Math.cos(car.rotation.y) * 5
+          physics.position.x + Math.sin(physics.yaw) * 5,
+          physics.position.y + 0.8,
+          physics.position.z + Math.cos(physics.yaw) * 5
         );
       }
 
-      audio.update(rpmDisplay, isDrifting, isNosActive);
+      audio.update(telem.rpmRatio, telem.isDrifting, telem.nitroActive);
 
-      const kmh = Math.round(Math.abs(speed) * 145);
-      hudSpeed.innerText = kmh;
-      hudGear.innerText = currentGear;
-      hudRpmFill.style.width = `${Math.round(rpmDisplay * 100)}%`;
-      hudNitroFill.style.width = `${Math.round(nosFuel)}%`;
+      hudSpeed.innerText = telem.speedKmh;
+      hudGear.innerText = telem.gear;
+      hudRpmFill.style.width = `${Math.round(telem.rpmRatio * 100)}%`;
+      hudNitroFill.style.width = `${telem.nitroFuel}%`;
+
+      if (telem.isDrifting) {
+        hudDriftBanner.classList.add('active');
+        hudDriftScore.innerText = `+${telem.driftPoints} DRIFT`;
+        hudDriftCombo.innerText = `${telem.driftMultiplier}x MULTIPLIER`;
+      } else {
+        hudDriftBanner.classList.remove('active');
+      }
 
       renderer.render(scene, camera);
     }
